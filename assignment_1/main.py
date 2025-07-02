@@ -1,7 +1,7 @@
 import random
 from pokemon_trainer import PokemonTrainer
 from pokemon_character import PokemonCharacter
-from pokemons_and_moves import starter_pokemon, moves
+from pokemon_and_moves import starter_pokemon, moves
 
 # main function that runs the script
 if __name__ == '__main__':
