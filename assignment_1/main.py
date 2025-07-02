@@ -18,7 +18,7 @@ if __name__ == '__main__':
         print(f"{i}: {pokemon["name"]}")
     starter_pokemon_choice = input("Tell me the number of the pokemon you want: ")
 
-    # create the starter pokemon
+    # create the starter pokemon and add it to the pokemon trainer's list
     chosen_pokemon = starter_pokemon[int(starter_pokemon_choice)]
     moves = {move["name"]: move for move in moves}
     chosen_pokemon = PokemonCharacter(
@@ -29,9 +29,10 @@ if __name__ == '__main__':
         moves=[moves[m] for m in chosen_pokemon["moves"]]
     )
     print(f"You chose {chosen_pokemon.name}! Great choice {trainer_name}!")
+    trainer.pokemon_list.append(chosen_pokemon)
 
     # choose an enemy pokemon uniformly at random among those not selected by the pokemon trainer
-    enemy_pokemon = random.choice([p for p in starter_pokemon if p["name"] != chosen_pokemon.name])
+    enemy_pokemon = random.choice([p for p in starter_pokemon if p["name"] != trainer.pokemon_list[0].name])
     enemy_pokemon = PokemonCharacter(
         name=enemy_pokemon["name"],
         national_pokedex_number=enemy_pokemon["national_pokedex_number"],
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     )
 
     # make the battle going on until the pokemon trainer decides to stop or the pokemon faints
-    print(f"\nLet's test some of the moves of your {chosen_pokemon.name} against my {enemy_pokemon.name}.")
+    print(f"\nLet's test some of the moves of your {trainer.pokemon_list[0].name} against my {enemy_pokemon.name}.")
     print(f"{enemy_pokemon.name} HP: {enemy_pokemon.base_stats['hp']}")
     round = 1
     while True:
@@ -51,26 +52,26 @@ if __name__ == '__main__':
 
         # ask the pokemon trainer to choose a move
         print("The moves available for your pokemon are:")
-        for i, move in enumerate(chosen_pokemon.moves):
+        for i, move in enumerate(trainer.pokemon_list[0].moves):
             print(f"{i}: {move['name']} (PP: {move['pp']})")
         move = input("Choose a move by typing its number or press q to end the battle: ")
         if move == 'q':
             print("Battle ended. Thanks for playing!")
             break
         move = int(move)
-        if move < 0 or move >= len(chosen_pokemon.moves):
+        if move < 0 or move >= len(trainer.pokemon_list[0].moves):
             print("Invalid choice! Please choose a valid move number.")
             continue
-        move_name = chosen_pokemon.moves[move]["name"]
+        move_name = trainer.pokemon_list[0].moves[move]["name"]
 
         # check that the move has enough PP
-        if chosen_pokemon.moves[move]["pp"] == 0:
-            print(f"\n{chosen_pokemon.name} has no PP left for {move_name}! Choose another move.")
+        if trainer.pokemon_list[0].moves[move]["pp"] == 0:
+            print(f"\n{trainer.pokemon_list[0].name} has no PP left for {move_name}! Choose another move.")
             continue
 
         # use the move against the enemy pokemon
         print()
-        chosen_pokemon.use_move(move_name, enemy_pokemon)
+        trainer.pokemon_list[0].use_move(move_name, enemy_pokemon)
 
         # check if the enemy pokemon has fainted
         if enemy_pokemon.base_stats['hp'] <= 0:
