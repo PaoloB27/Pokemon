@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # make the battle going on until the pokemon trainer decides to stop or the pokemon faints
     print(f"\nLet's test some of the moves of your {trainer.pokemon_list[0].name} against my {enemy_pokemon.name}.")
-    print(f"{enemy_pokemon.name} HP: {enemy_pokemon.base_stats['hp']}")
+    print(f"{enemy_pokemon.name} HP: {enemy_pokemon.curr_hp}")
     round = 1
     while True:
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         # ask the pokemon trainer to choose a move
         print("The moves available for your pokemon are:")
         for i, move in enumerate(trainer.pokemon_list[0].moves):
-            print(f"{i}: {move['name']} (PP: {move['pp']})")
+            print(f"{i}: {move['name']} (PP: {trainer.pokemon_list[0].curr_pps[move['name']]})")
         move = input("Choose a move by typing its number or press q to end the battle: ")
         if move == 'q':
             print("Battle ended. Thanks for playing!")
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         move_name = trainer.pokemon_list[0].moves[move]["name"]
 
         # check that the move has enough PP
-        if trainer.pokemon_list[0].moves[move]["pp"] == 0:
+        if trainer.pokemon_list[0].curr_pps[move_name] == 0:
             print(f"\n{trainer.pokemon_list[0].name} has no PP left for {move_name}! Choose another move.")
             continue
 
@@ -74,12 +74,12 @@ if __name__ == '__main__':
         trainer.pokemon_list[0].use_move(move_name, enemy_pokemon)
 
         # check if the enemy pokemon has fainted
-        if enemy_pokemon.base_stats['hp'] <= 0:
+        if enemy_pokemon.curr_hp <= 0:
             print(f"\n{enemy_pokemon.name} has fainted! You win!")
             break
 
         # print the hp of the enemy pokemon
-        print(f"{enemy_pokemon.name} HP: {enemy_pokemon.base_stats['hp']}")
+        print(f"{enemy_pokemon.name} HP: {enemy_pokemon.curr_hp}")
 
         # update the round number
         round += 1
