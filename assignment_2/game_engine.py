@@ -59,23 +59,6 @@ def pokemon_store_action(pokemon_trainer):
     """
     pass
 
-def run_action(pokemon_trainer, action):
-    """
-    Runs the action provided as input.
-
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object that is acting in the Pokemon World.
-    - action: string that indicates which action must be run. It must be "explore", "pokemon center" or "pokemon store".
-    """
-
-    # run the appropriate action
-    if action == "explore":
-        explore_action(pokemon_trainer)
-    elif action == "pokemon center":
-        pokemon_center_action(pokemon_trainer)
-    elif action == "pokemon store":
-        pokemon_store_action(pokemon_trainer)
-
 def run_game(trainer):
     """
     Runs the game.
@@ -94,7 +77,25 @@ def run_game(trainer):
     while True:
 
         # make the player choose the next action
-        print("Choose one of the following actions:")
+        print("\nChoose one of the following actions:")
         for i, action in enumerate(actions):
             print(f"{i}: {action}")
-        input("Enter the number of the action you select: ")
+        no_int = False
+        try:
+            action_id = int(input("Enter the number of the action you select: "))
+        except ValueError:
+            no_int = True
+        if no_int or action_id < 0 or action_id >= len(actions):
+            print("Invalid choice. Please, choose one of the numbers related to the possible actions.")
+            continue
+
+        # run the action selected by the user
+        if actions[action_id] == "explore":
+            explore_action(trainer)
+        elif actions[action_id] == "pokemon center":
+            pokemon_center_action(trainer)
+        elif actions[action_id] == "pokemon store":
+            pokemon_store_action(trainer)
+        elif actions[action_id] == "quit":
+            print("\nThe game has been successfully closed. Thank you for playing!")
+            break
