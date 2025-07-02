@@ -14,8 +14,8 @@ class PokemonTrainer:
         Parameters:
         - name: string with the name of the pokemon trainer.
         - pokemon_list: list with the pokemon that the pokemon trainer has.
-                        The maximum number of pokemon that a pokemon trainer can have is MAX_N_POKEMON.
-                        If the list has more than MAX_N_POKEMON pokemon, an error is raised.
+                        The maximum number of pokemon that a pokemon trainer can have is max_n_pokemon.
+                        If the list has more than max_n_pokemon pokemon, an error is raised.
         """
 
         # name of the pokemon trainer
@@ -24,8 +24,8 @@ class PokemonTrainer:
         # list with the pokemon that the pokemon trainer has
         if pokemon_list is None:
             self.pokemon_list = []
-        elif len(pokemon_list) > PokemonTrainer.MAX_N_POKEMON:
-            raise ValueError("A pokemon trainer can have at most 6 pokemon.")
+        elif len(pokemon_list) > PokemonTrainer.max_n_pokemon:
+            raise ValueError(f"A pokemon trainer can have at most {PokemonTrainer.max_n_pokemon} pokemon.")
         else:
             self.pokemon_list = pokemon_list
 
