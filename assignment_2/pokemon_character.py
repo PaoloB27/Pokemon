@@ -43,11 +43,19 @@ class PokemonCharacter:
         # set the types of the pokemon
         self.types = types
 
-        # set the base stats of the pokemon
+        # initialize the base stats of the pokemon
         self.base_stats = base_stats
+
+        # initialize the current HP of the pokemon to the maximum
+        self.curr_hp = self.base_stats["hp"]
 
         # set the moves of the pokemon
         self.moves = moves
+
+        # initialize the PP of the moves to the maximum
+        self.curr_pps = {}
+        for move in self.moves:
+            self.curr_pps[move["name"]] = move["pp"]
     
     def use_move(self, move_name, opponent_pokemon):
         """
@@ -66,10 +74,10 @@ class PokemonCharacter:
                 break
 
         # print some information about the move
-        print(f"{self.name} used {move_name}!")
+        print(f"{self.name} uses {move_name}!")
 
         # reduce the power points (pp) of the move, independently of whether the move succeeds or not
-        move["pp"] -= 1
+        self.curr_pps[move_name] -= 1
 
         # the move succeeds with a probability equal to its accuracy
         if random.random() < move["accuracy"]:
@@ -85,7 +93,7 @@ class PokemonCharacter:
             damage = math.floor(((2 * self.level + 10) / 250 * (attack / defense) * move["power"] + 2) * modifier)
 
             # apply the damage to the opponent pokemon
-            opponent_pokemon.base_stats["hp"] -= damage
+            opponent_pokemon.curr_hp -= damage
 
             # print some information about the move
             print(f"The move dealt a damage of {damage} HP to {opponent_pokemon.name}.")
