@@ -1,5 +1,6 @@
 import random
 import math
+from utils import type_text
 
 class PokemonCharacter:
     """
@@ -74,7 +75,7 @@ class PokemonCharacter:
                 break
 
         # print some information about the move
-        print(f"{self.name} uses {move_name}!")
+        type_text(f"{self.name} uses {move_name}!\n")
 
         # reduce the power points (pp) of the move, independently of whether the move succeeds or not
         self.curr_pps[move_name] -= 1
@@ -96,8 +97,8 @@ class PokemonCharacter:
             opponent_pokemon.curr_hp -= damage
 
             # print some information about the move
-            print(f"The move dealt a damage of {damage} HP to {opponent_pokemon.name}.")
+            type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
         
         # if the move fails, just print information
         else:
-            print(f"{self.name}'s {move_name} missed!")
+            type_text(f"{self.name}'s {move_name} missed!\n")

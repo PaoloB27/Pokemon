@@ -1,3 +1,0 @@
-wild_pokemon = [
-    {}
-]

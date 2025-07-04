@@ -1,4 +1,6 @@
+import time
 import random
+from utils import type_text
 
 class PokemonTrainer:
     """
@@ -55,7 +57,7 @@ class PokemonTrainer:
         # add the item with the input quantity
         else:
             self.items[item] = quantity
-        print(f"\n{quantity} {item}s added to your items. Now you have {self.items[item]} {item}s.")
+        type_text(f"{quantity} {item}s added to your items. Now you have {self.items[item]} {item}s.\n")
     
     def decrease_item(self, item):
         """
@@ -85,13 +87,17 @@ class PokemonTrainer:
 
         # give a potion to the active pokemon, if there is a potion among the trainer's items
         if "potion" in self.items:
+            type_text(f"\n{self.name} gives a potion to {self.active_pokemon.name}!\n")
+            type_text(f"Previous HP of {self.active_pokemon.name}: {self.active_pokemon.curr_hp}\n")
             self.active_pokemon.curr_hp += 20
-            if self.active_pokemon.curr_hp > self.active_pokemon.base_stast["hp"]:
-                self.active_pokemon.curr_hp = self.active_pokemon.base_stast["hp"]
-                self.decrease_item("potion")
+            if self.active_pokemon.curr_hp > self.active_pokemon.base_stats["hp"]:
+                self.active_pokemon.curr_hp = self.active_pokemon.base_stats["hp"]
+            type_text(f"Current HP of {self.active_pokemon.name}: {self.active_pokemon.curr_hp}\n")
+            self.decrease_item("potion")
 
         # there are not potions in the dictionary of items
-        raise ValueError("there are not potions in your backpack.")
+        else:
+            raise ValueError("There are not potions in your backpack.")
     
     def use_pokeball(self, opponent_pokemon):
         """
@@ -111,18 +117,21 @@ class PokemonTrainer:
 
             # decrease the available pokeballs
             self.decrease_item("pokeball")
-            print(f"{self.name} uses a Pokeball!")
+            type_text(f"{self.name} uses a Pokeball!\n")
 
             # probability of catching the opponent pokemon
             catch_probability = 1 - opponent_pokemon.curr_hp / opponent_pokemon.base_stats["hp"]
 
             # the pokemon is catched
-            if random.random < catch_probability:
-                print(f"1... 2... 3... Yes! Congratulations {self.name}, you catched a {opponent_pokemon.name}!")
+            if random.random() < catch_probability:
+                for i in range(1, 4):
+                    type_text(f"{i}... ")
+                    time.sleep(0.5)
+                type_text(f"Yes! Congratulations! {self.name} catched a {opponent_pokemon.name}!\nThe catched {opponent_pokemon.name} has been added to yuour list of pokemon.\n")
                 
                 # there is no more space for a new pokemon
                 if len(self.pokemon_list) >= self.max_n_pokemon:
-                    print(f"Oh, no! You do not have enough space for your new {opponent_pokemon.name}!")
+                    type_text(f"Oh, no! You do not have enough space for your new {opponent_pokemon.name}!\n")
                     raise OverflowError("Your list of pokemon is full.")
                 
                 # add the pokemon to the trainer's list
@@ -132,7 +141,10 @@ class PokemonTrainer:
 
             # the pokemon broke free        
             else:
-                print(f"1... 2... 3... Oh, no! the wild {opponent_pokemon.name} broke free!")
+                for i in range(1, 3):
+                    type_text(f"{i}... ")
+                    time.sleep(0.5)
+                type_text(f"The wild {opponent_pokemon.name} broke free!\n")
                 return False
 
         # there are not pokeballs in the dictionary of items
@@ -170,7 +182,9 @@ class PokemonTrainer:
         # find the pokemon in the trainer's list with the input name and set it as the active pokemon
         for pokemon in self.pokemon_list:
             if pokemon.name == new_active_pokemon_name:
+                previous_name = self.active_pokemon.name
                 self.active_pokemon = pokemon
+                type_text(f"{self.name} calls {self.active_pokemon.name} to substitute {previous_name}.\n")
                 return
         
         # there is no pokemon in the trainer's list with the input name, so raise a ValueError
