@@ -379,9 +379,6 @@ def pokemon_store_action(pokemon_trainer):
 def run_game():
     """
     Runs the game.
-
-    Parameters:
-    - trainer: PokemonTrainer object representing the pokemon trainer.
     """
 
     # initialize the pokemon trainer
