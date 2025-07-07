@@ -1,3 +1,4 @@
+{"attack": "normal", "defend": "steel", "effectiveness": 0.5}
 {"attack": "normal", "defend": "fairy", "effectiveness": 1}
 {"attack": "normal", "defend": "normal", "effectiveness": 1}
 {"attack": "normal", "defend": "fire", "effectiveness": 1}
@@ -14,6 +15,7 @@
 {"attack": "normal", "defend": "rock", "effectiveness": 0.5}
 {"attack": "normal", "defend": "ghost", "effectiveness": 0}
 {"attack": "normal", "defend": "dragon", "effectiveness": 1}
+{"attack": "fire", "defend": "steel", "effectiveness": 2}
 {"attack": "fire", "defend": "fairy", "effectiveness": 1}
 {"attack": "fire", "defend": "normal", "effectiveness": 1}
 {"attack": "fire", "defend": "fire", "effectiveness": 0.5}
@@ -30,6 +32,7 @@
 {"attack": "fire", "defend": "rock", "effectiveness": 0.5}
 {"attack": "fire", "defend": "ghost", "effectiveness": 1}
 {"attack": "fire", "defend": "dragon", "effectiveness": 0.5}
+{"attack": "fairy", "defend": "steel", "effectiveness": 0.5}
 {"attack": "fairy", "defend": "fairy", "effectiveness": 1}
 {"attack": "fairy", "defend": "normal", "effectiveness": 1}
 {"attack": "fairy", "defend": "fire", "effectiveness": 0.5}
@@ -46,6 +49,7 @@
 {"attack": "fairy", "defend": "rock", "effectiveness": 1}
 {"attack": "fairy", "defend": "ghost", "effectiveness": 1}
 {"attack": "fairy", "defend": "dragon", "effectiveness": 2}
+{"attack": "water", "defend": "steel", "effectiveness": 1}
 {"attack": "water", "defend": "fairy", "effectiveness": 1}
 {"attack": "water", "defend": "normal", "effectiveness": 1}
 {"attack": "water", "defend": "fire", "effectiveness": 2}
@@ -62,6 +66,7 @@
 {"attack": "water", "defend": "rock", "effectiveness": 2}
 {"attack": "water", "defend": "ghost", "effectiveness": 1}
 {"attack": "water", "defend": "dragon", "effectiveness": 0.5}
+{"attack": "electric", "defend": "steel", "effectiveness": 1}
 {"attack": "electric", "defend": "fairy", "effectiveness": 1}
 {"attack": "electric", "defend": "normal", "effectiveness": 1}
 {"attack": "electric", "defend": "fire", "effectiveness": 1}
@@ -78,6 +83,7 @@
 {"attack": "electric", "defend": "rock", "effectiveness": 1}
 {"attack": "electric", "defend": "ghost", "effectiveness": 1}
 {"attack": "electric", "defend": "dragon", "effectiveness": 0.5}
+{"attack": "grass", "defend": "steel", "effectiveness": 0.5}
 {"attack": "grass", "defend": "fairy", "effectiveness": 1}
 {"attack": "grass", "defend": "normal", "effectiveness": 1}
 {"attack": "grass", "defend": "fire", "effectiveness": 0.5}
@@ -94,6 +100,7 @@
 {"attack": "grass", "defend": "rock", "effectiveness": 2}
 {"attack": "grass", "defend": "ghost", "effectiveness": 1}
 {"attack": "grass", "defend": "dragon", "effectiveness": 0.5}
+{"attack": "ice", "defend": "steel", "effectiveness": 0.5}
 {"attack": "ice", "defend": "fairy", "effectiveness": 1}
 {"attack": "ice", "defend": "normal", "effectiveness": 1}
 {"attack": "ice", "defend": "fire", "effectiveness": 1}
@@ -110,6 +117,7 @@
 {"attack": "ice", "defend": "rock", "effectiveness": 1}
 {"attack": "ice", "defend": "ghost", "effectiveness": 1}
 {"attack": "ice", "defend": "dragon", "effectiveness": 2}
+{"attack": "fighting", "defend": "steel", "effectiveness": 2}
 {"attack": "fighting", "defend": "fairy", "effectiveness": 0.5}
 {"attack": "fighting", "defend": "normal", "effectiveness": 2}
 {"attack": "fighting", "defend": "fire", "effectiveness": 1}
@@ -126,6 +134,7 @@
 {"attack": "fighting", "defend": "rock", "effectiveness": 2}
 {"attack": "fighting", "defend": "ghost", "effectiveness": 0}
 {"attack": "fighting", "defend": "dragon", "effectiveness": 1}
+{"attack": "poison", "defend": "steel", "effectiveness": 0}
 {"attack": "poison", "defend": "fairy", "effectiveness": 2}
 {"attack": "poison", "defend": "normal", "effectiveness": 1}
 {"attack": "poison", "defend": "fire", "effectiveness": 1}
@@ -142,6 +151,7 @@
 {"attack": "poison", "defend": "rock", "effectiveness": 0.5}
 {"attack": "poison", "defend": "ghost", "effectiveness": 0.5}
 {"attack": "poison", "defend": "dragon", "effectiveness": 1}
+{"attack": "ground", "defend": "steel", "effectiveness": 2}
 {"attack": "ground", "defend": "fairy", "effectiveness": 1}
 {"attack": "ground", "defend": "normal", "effectiveness": 1}
 {"attack": "ground", "defend": "fire", "effectiveness": 2}
@@ -158,6 +168,7 @@
 {"attack": "ground", "defend": "rock", "effectiveness": 2}
 {"attack": "ground", "defend": "ghost", "effectiveness": 1}
 {"attack": "ground", "defend": "dragon", "effectiveness": 1}
+{"attack": "flying", "defend": "steel", "effectiveness": 1}
 {"attack": "flying", "defend": "fairy", "effectiveness": 1}
 {"attack": "flying", "defend": "normal", "effectiveness": 1}
 {"attack": "flying", "defend": "fire", "effectiveness": 1}
@@ -174,6 +185,7 @@
 {"attack": "flying", "defend": "rock", "effectiveness": 0.5}
 {"attack": "flying", "defend": "ghost", "effectiveness": 1}
 {"attack": "flying", "defend": "dragon", "effectiveness": 1}
+{"attack": "psychic", "defend": "steel", "effectiveness": 0.5}
 {"attack": "psychic", "defend": "fairy", "effectiveness": 1}
 {"attack": "psychic", "defend": "normal", "effectiveness": 1}
 {"attack": "psychic", "defend": "fire", "effectiveness": 1}
@@ -190,6 +202,7 @@
 {"attack": "psychic", "defend": "rock", "effectiveness": 1}
 {"attack": "psychic", "defend": "ghost", "effectiveness": 1}
 {"attack": "psychic", "defend": "dragon", "effectiveness": 1}
+{"attack": "bug", "defend": "steel", "effectiveness": 0.5}
 {"attack": "bug", "defend": "fairy", "effectiveness": 0.5}
 {"attack": "bug", "defend": "normal", "effectiveness": 1}
 {"attack": "bug", "defend": "fire", "effectiveness": 0.5}
@@ -206,6 +219,7 @@
 {"attack": "bug", "defend": "rock", "effectiveness": 1}
 {"attack": "bug", "defend": "ghost", "effectiveness": 0.5}
 {"attack": "bug", "defend": "dragon", "effectiveness": 1}
+{"attack": "rock", "defend": "steel", "effectiveness": 0.5}
 {"attack": "rock", "defend": "fairy", "effectiveness": 1}
 {"attack": "rock", "defend": "normal", "effectiveness": 1}
 {"attack": "rock", "defend": "fire", "effectiveness": 2}
@@ -222,6 +236,24 @@
 {"attack": "rock", "defend": "rock", "effectiveness": 1}
 {"attack": "rock", "defend": "ghost", "effectiveness": 1}
 {"attack": "rock", "defend": "dragon", "effectiveness": 1}
+{"attack": "steel", "defend": "steel", "effectiveness": 0.5}
+{"attack": "steel", "defend": "fairy", "effectiveness": 2}
+{"attack": "steel", "defend": "normal", "effectiveness": 1}
+{"attack": "steel", "defend": "fire", "effectiveness": 0.5}
+{"attack": "steel", "defend": "water", "effectiveness": 0.5}
+{"attack": "steel", "defend": "electric", "effectiveness": 0.5}
+{"attack": "steel", "defend": "grass", "effectiveness": 1}
+{"attack": "steel", "defend": "ice", "effectiveness": 2}
+{"attack": "steel", "defend": "fighting", "effectiveness": 1}
+{"attack": "steel", "defend": "poison", "effectiveness": 1}
+{"attack": "steel", "defend": "ground", "effectiveness": 1}
+{"attack": "steel", "defend": "flying", "effectiveness": 1}
+{"attack": "steel", "defend": "psychic", "effectiveness": 1}
+{"attack": "steel", "defend": "bug", "effectiveness": 1}
+{"attack": "steel", "defend": "rock", "effectiveness": 2}
+{"attack": "steel", "defend": "ghost", "effectiveness": 1}
+{"attack": "steel", "defend": "dragon", "effectiveness": 1}
+{"attack": "ghost", "defend": "steel", "effectiveness": 1}
 {"attack": "ghost", "defend": "fairy", "effectiveness": 1}
 {"attack": "ghost", "defend": "normal", "effectiveness": 0}
 {"attack": "ghost", "defend": "fire", "effectiveness": 1}
@@ -238,6 +270,7 @@
 {"attack": "ghost", "defend": "rock", "effectiveness": 1}
 {"attack": "ghost", "defend": "ghost", "effectiveness": 2}
 {"attack": "ghost", "defend": "dragon", "effectiveness": 1}
+{"attack": "dragon", "defend": "steel", "effectiveness": 0.5}
 {"attack": "dragon", "defend": "fairy", "effectiveness": 0}
 {"attack": "dragon", "defend": "normal", "effectiveness": 1}
 {"attack": "dragon", "defend": "fire", "effectiveness": 1}
