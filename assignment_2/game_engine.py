@@ -80,9 +80,14 @@ def attack(pokemon_trainer, opponent_pokemon):
     - is_defeated: boolean indicating whether the opponent pokemon is defeated or not.
     """
 
-    # make the pokemon trainer choose a move
-    possible_moves = [move['name'] for move in pokemon_trainer.active_pokemon.moves]
-    options = [f"{move_name} | {pp} PP" for move_name, pp in pokemon_trainer.active_pokemon.curr_pps.items()]
+    # if the active pokemon does not have any move with pps > 0, then return
+    if not [pp for pp in pokemon_trainer.active_pokemon.curr_pps.values() if pp > 0]:
+        type_text(f"\nOh no! {pokemon_trainer.active_pokemon.name} finished all the PPs!\n")
+        return
+
+    # make the pokemon trainer choose a move that still has some pps
+    possible_moves = [move_name for move_name, pp in pokemon_trainer.active_pokemon.curr_pps.items() if pp > 0]
+    options = [f"{move_name} | {pp} PP" for move_name, pp in pokemon_trainer.active_pokemon.curr_pps.items() if pp > 0]
     chosen_move = possible_moves[choose_option(options, question_sentence=f"Which move do you want {pokemon_trainer.active_pokemon.name} to use?")]
 
     # make the active pokemon attack the opponent pokemon with the chosen move
@@ -203,9 +208,16 @@ def opponent_pokemon_turn(pokemon_trainer, opponent_pokemon):
     - is_defeated: boolean indicating whether all pokemon of the pokemon trainer have been defeated or not.
     """
 
-    # make the opponent pokemon attack the trainer's active pokemon with a move sampled uniformly at random among the available ones
+    # print some information    
     type_text(f"\nIt's the turn of {opponent_pokemon.name} now!\n\n")
-    opponent_pokemon.use_move(random.choice([move["name"] for move in opponent_pokemon.moves]), pokemon_trainer.active_pokemon)
+
+    # if the wild pokemon does not have any move with pp > 0, then return
+    if not [pp for pp in opponent_pokemon.curr_pps.values() if pp > 0]:
+        type_text(f"\nOh no! {opponent_pokemon.name} finished all the PPs!\n")
+        return
+
+    # make the opponent pokemon attack the trainer's active pokemon with a move sampled uniformly at random among the available ones
+    opponent_pokemon.use_move(random.choice([move_name for move_name, pp in opponent_pokemon.curr_pps.items() if pp > 0]), pokemon_trainer.active_pokemon)
     
     # check whether the trainer's active pokemon is defeated
     if pokemon_trainer.active_pokemon.curr_hp <= 0:
@@ -220,6 +232,36 @@ def opponent_pokemon_turn(pokemon_trainer, opponent_pokemon):
     
     # the battle is not ended
     return False
+
+def check_pps(pokemon_trainer, opponent_pokemon):
+    """
+    Checks whether all trainer's pokemons and the opponent pokemon do not have any move with pp > 0.
+
+    Parameters:
+    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
+    - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
+
+    Returns:
+    - no_pps: boolean indicating whether all trainer's pokemons and the opponent pokemon do not have any move with pp > 0.
+    """
+
+    # check whether the opponent pokemon has at least a move with pp > 0
+    for pp in opponent_pokemon.curr_pps.values():
+        if pp > 0:
+            return False
+    
+    # check whether there is at least one trainer's pokemon that can fight with at least one move with pp > 0
+    for pokemon in pokemon_trainer.pokemon_list:
+        if pokemon.curr_hp > 0:
+            for pp in opponent_pokemon.curr_pps.values():
+                if pp > 0:
+                    return False
+            
+    # no pokemon has at least one move with pp > 0
+    type_text(f"\n{pokemon_trainer.name} has no pokemon with pp > 0 that can fight!\n")
+    type_text(f"Even {opponent_pokemon.name} has no move with pp > 0!\n")
+    type_text(f"The battle ends.\n")
+    return True
 
 def battle(pokemon_trainer, opponent_pokemon):
     """
@@ -282,6 +324,10 @@ def battle(pokemon_trainer, opponent_pokemon):
             pokemon_center_action(pokemon_trainer)
             
             return                                        # the battle ends, because the trainer's pokemon are K.O.
+
+        # check whether all trainer's pokemon as well as the wild pokemon have all moves with pps that are finished
+        if check_pps:
+            return                                        # the battle ends, because all trainer's pokemon and the wild pokemon have no more pps
 
         # update the round number
         round += 1
