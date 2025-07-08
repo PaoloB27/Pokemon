@@ -1,6 +1,6 @@
 import random
 import math
-from utils import type_text
+# from utils import type_text
 
 class PokemonCharacter:
     """
@@ -59,34 +59,40 @@ class PokemonCharacter:
         for move in self.moves:
             self.curr_pps[move["name"]] = move["pp"]
     
-    def use_move(self, move_name, opponent_pokemon):
+    def use_move(self, move_name, opponent_pokemon, type_effectiveness):
         """
         Use the input move to attack the opponent pokemon.
 
         Parameters:
         - move_name: string with the name of the move to be used.
         - opponent_pokemon: PokemonCharacter object representing the pokemon that is being attacked.
+        - type_effectiveness: dictionary with type effectivenesses of moves.
+                              type_effectiveness["attack_type"]["defend_type"] is a float with the type effectiveness of a move of type "attack_type" against a pokemon of type "defend_type".
         """
 
-        # get the selected move from the moves of the pokemin
+        # get the selected move from the moves of the pokemon
         move = None
         for m in self.moves:
             if m["name"] == move_name:
                 move = m
                 break
 
-        # print some information about the move
-        type_text(f"{self.name} uses {move_name}!\n")
+        # # print some information about the move
+        # type_text(f"{self.name} uses {move_name}!\n")
 
-        # reduce the power points (pp) of the move, independently of whether the move succeeds or not
-        self.curr_pps[move_name] -= 1
+        # # reduce the power points (pp) of the move, independently of whether the move succeeds or not
+        # self.curr_pps[move_name] -= 1
 
         # the move succeeds with a probability equal to its accuracy
         if random.random() < move["accuracy"]:
 
+            # compute the effect modifier based on the move type and on the opponent pokemon type
+            effect = 1
+            for opponent_type in opponent_pokemon.types:
+                effect *= type_effectiveness[move["type"]][opponent_type]
+
             # compute the damage dealt by the move to the opponent pokemon
             stability = 1.5 if move["type"] in self.types else 1.0
-            effect = 1
             critical = 2 if random.random() < (self.base_stats["speed"] / 512) else 1
             luck = random.uniform(0.85, 1.0)
             modifier = stability * effect * critical * luck
@@ -97,9 +103,9 @@ class PokemonCharacter:
             # apply the damage to the opponent pokemon
             opponent_pokemon.curr_hp -= damage
 
-            # print some information about the move
-            type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
+            # # print some information about the move
+            # type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
         
-        # if the move fails, just print information
-        else:
-            type_text(f"{self.name}'s {move_name} missed!\n")
+        # # if the move fails, just print information
+        # else:
+        #     type_text(f"{self.name}'s {move_name} missed!\n")
