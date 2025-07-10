@@ -1,45 +1,88 @@
 import os
-import pickle
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+def compute_hp_reduction_initial_hps(data):
+    """
+    Computes the percentage reduction of hps at each turn with respect to the hps of the starter pokemon at the beginning of the battle.
+
+    Parameters:
+    - data: pandas dataframe with data related to a single battle of a single game.
+
+    Returns:
+    - data: pandas series with the reduction of hps at each turn in the column "HP Reduction %".
+    """
+
+    # sort the values by increasing turn
+    red_data = data.sort_values("Turn")
+
+    # hps of the starter pokemon at the beginning of the battle
+    initial_hps = red_data.iloc[0]["Starter Initial HPs"]
+
+    # shift the initial hps up by 1: shifted_hps has the hps after the end of a turn
+    shifted_hps = red_data["Starter Initial HPs"].shift(-1)
+
+    # compute the percentage reduction of hps with respect to hps of the beginning of the battle
+    red_data["HP Reduction %"] = (initial_hps - shifted_hps) / initial_hps * 100
+
+    # set the hp reduction in the final turn to 100 - final residual hps
+    red_data.at[red_data.index[-1], "HP Reduction %"] = 100 - red_data.iloc[-1]["Residual HP"]
+
+    return red_data
+
+def compute_hp_reduction_relative(data):
+    """
+    Computes the percentage reduction of hps at the end of each turn with respect to the hps of the beginning of the turn.
+
+    Parameters:
+    - data: pandas dataframe with data related to a single battle of a single game.
+
+    Returns:
+    - data: pandas series with the reduction of hps at each turn in the column "HP Reduction %".
+    """
+
+    # sort the values by increasing turn
+    red_data = data.sort_values("Turn")
+
+    # shift the initial hps up by 1: shifted_hps has the hps after the end of a turn
+    shifted_hps = red_data["Starter Initial HPs"].shift(-1)
+
+    # compute the percentage reduction of hps in each turn as (hps at the end of the turn - hps at the beginning of the turn)
+    red_data["HP Reduction %"] = (red_data["Starter Initial HPs"] - shifted_hps) / red_data["Starter Initial HPs"] * 100
+
+    # set the hp reduction in the final turn
+    red_data.at[red_data.index[-1], "HP Reduction %"] = red_data.iloc[-1]["Starter Initial HPs"] - red_data.iloc[-1]["Residual HP"]
+
+    return red_data
+
 def simple_plot(data, save_path):
     """
-    For each starter pokemon, it plots the cumulative number of battle wins at each game, averaged by the number of games.
+    Plots the  average (± std dev) reduction of the percentage player's pokemon hps along the battle turns.
 
     Parameters:
     - data: pandas dataframe with data collected from the simulation.
     - save_path: path where to save the plot.
     """
 
-    # convert boolean values in the "Battle Outcome" column into integers
-    data["Battle Outcome"] = data["Battle Outcome"].astype(int)
+    # compute the hp percentage reduction, both absolute and relative
+    absolute_df = data.groupby(["Game", "Battle"]).apply(compute_hp_reduction_initial_hps, include_groups=False)
+    relative_df = data.groupby(["Game", "Battle"]).apply(compute_hp_reduction_relative, include_groups=False)
 
-    # compute the cumulative number of battle won in a game, for each starter pokemon
-    plot_df = data.groupby(by=["Starter Pokemon", "Game"])["Battle Outcome"].sum()
-
-    # compute the average of the cumulative number of wins across games, for each starter pokemon
-    plot_df = plot_df.groupby(by=["Starter Pokemon"]).mean()
-
-    # convert the series into a dataframe
-    plot_df = plot_df.reset_index()
-    plot_df.columns = ["Starter Pokemon", "Average Wins"]
-    
-    # plot the values
+    # plot the hp percentage reduction, both relative and absolute
+    fig, (ax_1, ax_2) = plt.subplots(1, 2, figsize=(10, 6))
     sns.set_style("whitegrid")
-    ax = sns.barplot(data=plot_df, x="Starter Pokemon", y="Average Wins")
-
-
-    # add the values on top of each bar
-    for container in ax.containers:
-        ax.bar_label(container, fmt='%.1f', label_type='edge', padding=1)
-
-    # plot settings
-    plt.title(f"Number of Wins in {data["Battle"].max()} Battles Averaged over {data["Game"].max()} Games")
-    plt.ylabel("Average Wins")
-    plt.xlabel("Starter Pokemon")
+    
+    sns.pointplot(data=absolute_df, x="Turn", y="HP Reduction %", errorbar="sd", ax=ax_1, color="b")
+    ax_1.set_title("Average Percentage of Initial HPs Lost Across Turns")
+    ax_1.set_xlabel("% Initial HP Reduction")
+    
+    sns.pointplot(data=relative_df, x="Turn", y="HP Reduction %", errorbar="sd", ax=ax_2, color="r")
+    ax_2.set_title("Average Percentage of HPs Lost Across Turns")
+    ax_2.set_xlabel("% Relative HP Reduction")
+    
+    plt.tight_layout()
     plt.savefig(save_path, dpi=350)
     plt.close()
 
@@ -241,7 +284,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Creates some plots, taking as input the data generated by the simulation.")
 
     # arguments
-    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("results", "collected_data.pickle"), help="Path to the file with the collected data.")
+    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("results", "collected_data.csv"), help="Path to the file with the collected data.")
     parser.add_argument("-o", "--output_dir", type=str, required=False, default=os.path.join("results"), help="Path to the folder where to save the plots.")
                           
     return parser.parse_args()
@@ -252,18 +295,13 @@ if __name__ == '__main__':
     args = parse_args()
 
     # load data
-    pickle_in = open(args.input_data,"rb")
-    simulation_data = pickle.load(pickle_in)
-    pickle_in.close()
+    simulation_data = pd.read_csv(args.input_data)
 
     # create the output folder, if it does not exist
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # convert the list of dictionaries into a pandas dataframe
-    simulation_data = pd.DataFrame(simulation_data)
-
     # make some plots
-    # simple_plot(simulation_data, os.path.join(args.output_dir, "simple_plot.jpg"))
+    simple_plot(simulation_data, os.path.join(args.output_dir, "simple_plot.jpg"))
     # turn_distribution_plot(simulation_data, os.path.join(args.output_dir, "turns_distribution_plot.jpg"))
     # hp_distribution_plot(simulation_data, os.path.join(args.output_dir, "hp_distribution_plot.jpg"))
-    stats_per_enemy_plot(simulation_data, args.output_dir)
+    # stats_per_enemy_plot(simulation_data, args.output_dir)
