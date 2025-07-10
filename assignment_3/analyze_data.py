@@ -263,7 +263,7 @@ if __name__ == '__main__':
     simulation_data = pd.DataFrame(simulation_data)
 
     # make some plots
-    # simple_plot(simulation_data, os.path.join(args.output_dir, "simple_plot.jpg"))
-    # turn_distribution_plot(simulation_data, os.path.join(args.output_dir, "turns_distribution_plot.jpg"))
-    # hp_distribution_plot(simulation_data, os.path.join(args.output_dir, "hp_distribution_plot.jpg"))
+    simple_plot(simulation_data, os.path.join(args.output_dir, "simple_plot.jpg"))
+    turn_distribution_plot(simulation_data, os.path.join(args.output_dir, "turns_distribution_plot.jpg"))
+    hp_distribution_plot(simulation_data, os.path.join(args.output_dir, "hp_distribution_plot.jpg"))
     stats_per_enemy_plot(simulation_data, args.output_dir)

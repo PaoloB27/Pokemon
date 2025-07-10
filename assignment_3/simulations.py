@@ -249,13 +249,17 @@ def parse_args():
     parser.add_argument("--input_moves", type=str, required=False, default=os.path.join("..", "data", "moves.json"), help="Path to the dataset with moves.")
     parser.add_argument("--input_type_effectiveness", type=str, required=False, default=os.path.join("..", "data", "type_effectiveness.json"), help="Path to the dataset with type effectiveness pairs.")
     parser.add_argument("--output_data", type=str, required=False, default=os.path.join("results", "collected_data.pickle"), help="Path to the file where to save the collected data.")
-                          
+    parser.add_argument("--random_seed", type=int, required=False, default=27, help="Random seed for reproducibility.")    
+
     return parser.parse_args()
 
 if __name__ == '__main__':
 
     # parse command line arguments
     args = parse_args()
+
+    # set a random seed for reproducibility
+    random.seed(args.random_seed)
 
     # load pokemons, moves and type effectiveness data from .json files
     moves = load_moves(args.input_moves)
