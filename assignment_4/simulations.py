@@ -233,7 +233,7 @@ def run_simulation(n_games, n_battles, starter_pokemons, wild_pokemons, type_eff
         for k in range(1, n_battles + 1):
 
             # run the battle and collect data
-            wild_pokemon_name, outcome, n_turns, residual_HP, turns_data = random_battle(starter, wild_pokemons, type_effectiveness, random_seed)
+            wild_pokemon_name, outcome, n_turns, residual_HP, turns_data = random_battle(starter, wild_pokemons, type_effectiveness)
 
             # add the data related to the entire battle to each dictionary with information for a single turn
             for turn in turns_data:
@@ -292,7 +292,7 @@ if __name__ == '__main__':
     starter_pokemons = pokemons[pokemons["name"].isin(["bulbasaur", "charmander", "squirtle", "pikachu"])]
 
     # run the simulation
-    collected_data = run_simulation(args.n_games, args.n_battles, starter_pokemons, pokemons, type_effectiveness, args.random_seed)
+    collected_data = run_simulation(args.n_games, args.n_battles, starter_pokemons, pokemons, type_effectiveness)
 
     # save the collected data
     os.makedirs(os.path.dirname(args.output_data), exist_ok=True)
