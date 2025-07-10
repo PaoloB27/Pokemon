@@ -48,8 +48,11 @@ class PokemonCharacter:
         # initialize the base stats of the pokemon
         self.base_stats = base_stats
 
+        # initialize the active stats of the pokemon, based on its base stats and on its level
+        self.active_stats = self.__compute_active_stats()
+        
         # initialize the current HP of the pokemon to the maximum
-        self.curr_hp = self.base_stats["hp"]
+        self.curr_hp = self.active_stats["hp"]
 
         # set the moves of the pokemon
         self.moves = moves
@@ -59,6 +62,27 @@ class PokemonCharacter:
         for move in self.moves:
             self.curr_pps[move["name"]] = move["pp"]
     
+    def __compute_active_stats(self):
+        """
+        Private method that computes the active stats of the pokemon based on its base stats and its level.
+
+        Returns:
+        - act_stats: dictionary with the active stats of the pokemon.
+        """
+
+        # initialize the dictionary
+        act_stats = {}
+
+        # compute the active hp
+        act_stats["hp"] = math.floor(self.base_stats["hp"] * 2 * self.level / 100) + self.level + 10
+
+        # compute all other active statistics
+        for stat_name, stat_value in self.base_stats.items():
+            if stat_name != "hp":
+                act_stats[stat_name] = math.floor(stat_value * 2 * self.level / 100) + 5
+        
+        return act_stats
+
     def use_move(self, move_name, opponent_pokemon, type_effectiveness):
         """
         Use the input move to attack the opponent pokemon.
@@ -66,8 +90,10 @@ class PokemonCharacter:
         Parameters:
         - move_name: string with the name of the move to be used.
         - opponent_pokemon: PokemonCharacter object representing the pokemon that is being attacked.
-        - type_effectiveness: dictionary with type effectivenesses of moves.
-                              type_effectiveness["attack_type"]["defend_type"] is a float with the type effectiveness of a move of type "attack_type" against a pokemon of type "defend_type".
+        - type_effectiveness: pandas dataframe with type effectivenesses of moves.
+        
+        Returns:
+        - damage: integer with the damage inflicted by the move.
         """
 
         # get the selected move from the moves of the pokemon
@@ -89,15 +115,15 @@ class PokemonCharacter:
             # compute the effect modifier based on the move type and on the opponent pokemon type
             effect = 1
             for opponent_type in opponent_pokemon.types:
-                effect *= type_effectiveness[move["type"]][opponent_type]
+                effect *= type_effectiveness[(type_effectiveness["attack"] == move["type"]) & (type_effectiveness["defend"] == opponent_type)]["effectiveness"].iloc[0]
 
             # compute the damage dealt by the move to the opponent pokemon
             stability = 1.5 if move["type"] in self.types else 1.0
-            critical = 2 if random.random() < (self.base_stats["speed"] / 512) else 1
+            critical = 2 if random.random() < (self.active_stats["speed"] / 512) else 1
             luck = random.uniform(0.85, 1.0)
             modifier = stability * effect * critical * luck
-            attack = self.base_stats["attack"] if move["category"] == "physical" else self.base_stats["special"]
-            defense = opponent_pokemon.base_stats["defense"] if move["category"] == "physical" else opponent_pokemon.base_stats["special"]
+            attack = self.active_stats["attack"] if move["category"] == "physical" else self.active_stats["special"]
+            defense = opponent_pokemon.active_stats["defense"] if move["category"] == "physical" else opponent_pokemon.active_stats["special"]
             damage = math.floor(((2 * self.level + 10) / 250 * (attack / defense) * move["power"] + 2) * modifier)
 
             # apply the damage to the opponent pokemon
@@ -109,3 +135,5 @@ class PokemonCharacter:
         # # if the move fails, just print information
         # else:
         #     type_text(f"{self.name}'s {move_name} missed!\n")
+
+            return damage

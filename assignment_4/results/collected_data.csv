@@ -1,0 +1,215 @@
+Turn,Starter Initial HPs,Starter Move,Starter Damage Inflicted,Wild Move,Wild Damage Inflicted,Wild Pokemon,Starter Pokemon,Battle Outcome,Battle Turns,Residual HP,Battle,Game
+1,24,body slam,2.0,mega punch,22.0,omanyte,charmander,0,2,0.0,1,1
+2,2,quick attack,1.0,pay day,11.0,omanyte,charmander,0,2,0.0,1,1
+1,24,body slam,13.0,quick attack,7.0,abra,charmander,1,3,33.33333333333333,2,1
+2,17,quick attack,7.0,karate chop,9.0,abra,charmander,1,3,33.33333333333333,2,1
+3,8,body slam,14.0,,,abra,charmander,1,3,33.33333333333333,2,1
+1,24,body slam,9.0,strength,8.0,blastoise,charmander,0,3,0.0,3,1
+2,16,constrict,2.0,strength,9.0,blastoise,charmander,0,3,0.0,3,1
+3,7,constrict,2.0,strength,8.0,blastoise,charmander,0,3,0.0,3,1
+1,24,quick attack,4.0,constrict,6.0,jynx,charmander,0,2,0.0,4,1
+2,18,constrict,2.0,dream eater,93.0,jynx,charmander,0,2,0.0,4,1
+1,24,body slam,2.0,gust,9.0,omastar,charmander,0,3,0.0,5,1
+2,15,body slam,3.0,tackle,7.0,omastar,charmander,0,3,0.0,5,1
+3,8,horn attack,2.0,tackle,13.0,omastar,charmander,0,3,0.0,5,1
+1,24,body slam,2.0,bonemerang,55.0,golem,charmander,0,1,0.0,6,1
+1,24,body slam,12.0,mega kick,12.0,dratini,charmander,1,3,29.166666666666668,7,1
+2,12,quick attack,6.0,pay day,5.0,dratini,charmander,1,3,29.166666666666668,7,1
+3,7,constrict,3.0,,,dratini,charmander,1,3,29.166666666666668,7,1
+1,24,constrict,2.0,take down,42.0,kingler,charmander,0,1,0.0,8,1
+1,24,horn attack,11.0,constrict,2.0,vulpix,charmander,1,2,91.66666666666666,9,1
+2,22,body slam,14.0,,,vulpix,charmander,1,2,91.66666666666666,9,1
+1,24,body slam,19.0,,,clefable,charmander,1,1,100.0,10,1
+1,11,fury attack,,hydro pump,44.0,shellder,bulbasaur,0,1,0.0,1,2
+1,11,double-edge,2.0,take down,163.0,raticate,bulbasaur,0,1,0.0,2,2
+1,11,double-edge,4.0,spike cannon,3.0,exeggutor,bulbasaur,0,3,0.0,3,2
+2,8,double-edge,4.0,spike cannon,3.0,exeggutor,bulbasaur,0,3,0.0,3,2
+3,5,explosion,6.0,mega punch,8.0,exeggutor,bulbasaur,0,3,0.0,3,2
+1,11,explosion,6.0,thrash,41.0,abra,bulbasaur,0,1,0.0,4,2
+1,11,fury attack,2.0,vice grip,6.0,grimer,bulbasaur,0,2,0.0,5,2
+2,5,petal dance,5.0,vice grip,6.0,grimer,bulbasaur,0,2,0.0,5,2
+1,11,explosion,7.0,spike cannon,3.0,ponyta,bulbasaur,1,3,45.45454545454545,6,2
+2,8,double-edge,5.0,fury attack,3.0,ponyta,bulbasaur,1,3,45.45454545454545,6,2
+3,5,fury attack,2.0,,,ponyta,bulbasaur,1,3,45.45454545454545,6,2
+1,11,fury attack,2.0,rage,10.0,spearow,bulbasaur,0,2,0.0,7,2
+2,1,petal dance,4.0,peck,27.0,spearow,bulbasaur,0,2,0.0,7,2
+1,11,double-edge,1.0,headbutt,15.0,onix,bulbasaur,0,1,0.0,8,2
+1,11,explosion,6.0,constrict,2.0,articuno,bulbasaur,1,3,63.63636363636363,9,2
+2,9,explosion,6.0,constrict,2.0,articuno,bulbasaur,1,3,63.63636363636363,9,2
+3,7,petal dance,3.0,,,articuno,bulbasaur,1,3,63.63636363636363,9,2
+1,11,fury attack,2.0,slam,65.0,rattata,bulbasaur,0,1,0.0,10,2
+1,15,explosion,4.0,wrap,15.0,pidgeot,bulbasaur,0,1,0.0,1,3
+1,15,double-edge,2.0,egg bomb,123.0,mew,bulbasaur,0,1,0.0,2,3
+1,15,double-edge,3.0,waterfall,33.0,psyduck,bulbasaur,0,1,0.0,3,3
+1,15,petal dance,62.0,,,geodude,bulbasaur,1,1,100.0,4,3
+1,15,explosion,3.0,thrash,70.0,weezing,bulbasaur,0,1,0.0,5,3
+1,15,fury attack,2.0,vice grip,30.0,kadabra,bulbasaur,0,1,0.0,6,3
+1,15,petal dance,3.0,headbutt,7.0,paras,bulbasaur,1,3,33.33333333333333,7,3
+2,8,explosion,10.0,spike cannon,3.0,paras,bulbasaur,1,3,33.33333333333333,7,3
+3,5,double-edge,6.0,,,paras,bulbasaur,1,3,33.33333333333333,7,3
+1,15,double-edge,4.0,fury attack,,hitmonlee,bulbasaur,0,2,0.0,8,3
+2,15,double-edge,4.0,fury attack,28.0,hitmonlee,bulbasaur,0,2,0.0,8,3
+1,15,explosion,6.0,comet punch,,nidoran♂,bulbasaur,0,2,0.0,9,3
+2,15,petal dance,3.0,slash,40.0,nidoran♂,bulbasaur,0,2,0.0,9,3
+1,15,double-edge,3.0,self-destruct,86.0,poliwhirl,bulbasaur,0,1,0.0,10,3
+1,33,body slam,15.0,,,kabutops,charmander,1,1,100.0,1,4
+1,33,quick attack,8.0,headbutt,10.0,weepinbell,charmander,1,3,63.63636363636363,2,4
+2,23,horn attack,13.0,absorb,2.0,weepinbell,charmander,1,3,63.63636363636363,2,4
+3,21,quick attack,9.0,,,weepinbell,charmander,1,3,63.63636363636363,2,4
+1,33,constrict,2.0,take down,18.0,seadra,charmander,0,2,0.0,3,4
+2,15,constrict,2.0,take down,20.0,seadra,charmander,0,2,0.0,3,4
+1,33,body slam,11.0,smog,7.0,nidoran♀,charmander,1,6,18.181818181818183,4,4
+2,26,constrict,2.0,smog,6.0,nidoran♀,charmander,1,6,18.181818181818183,4,4
+3,20,quick attack,6.0,smog,7.0,nidoran♀,charmander,1,6,18.181818181818183,4,4
+4,13,horn attack,9.0,smog,,nidoran♀,charmander,1,6,18.181818181818183,4,4
+5,13,body slam,11.0,smog,7.0,nidoran♀,charmander,1,6,18.181818181818183,4,4
+6,6,horn attack,8.0,,,nidoran♀,charmander,1,6,18.181818181818183,4,4
+1,33,constrict,5.0,rage,2.0,grimer,charmander,1,3,93.93939393939394,5,4
+2,31,constrict,5.0,egg bomb,,grimer,charmander,1,3,93.93939393939394,5,4
+3,31,body slam,35.0,,,grimer,charmander,1,3,93.93939393939394,5,4
+1,33,quick attack,18.0,,,dewgong,charmander,1,1,100.0,6,4
+1,33,body slam,11.0,stomp,18.0,magmar,charmander,0,3,0.0,7,4
+2,15,constrict,3.0,gust,10.0,magmar,charmander,0,3,0.0,7,4
+3,5,constrict,3.0,explosion,91.0,magmar,charmander,0,3,0.0,7,4
+1,33,quick attack,12.0,scratch,4.0,beedrill,charmander,1,2,87.87878787878788,8,4
+2,29,quick attack,11.0,,,beedrill,charmander,1,2,87.87878787878788,8,4
+1,33,quick attack,7.0,wrap,7.0,pidgey,charmander,1,5,39.39393939393939,9,4
+2,26,constrict,3.0,wrap,6.0,pidgey,charmander,1,5,39.39393939393939,9,4
+3,20,quick attack,7.0,wrap,7.0,pidgey,charmander,1,5,39.39393939393939,9,4
+4,13,body slam,14.0,wrap,,pidgey,charmander,1,5,39.39393939393939,9,4
+5,13,body slam,14.0,,,pidgey,charmander,1,5,39.39393939393939,9,4
+1,33,constrict,3.0,pound,4.0,ponyta,charmander,1,4,69.6969696969697,10,4
+2,29,constrict,3.0,fury attack,2.0,ponyta,charmander,1,4,69.6969696969697,10,4
+3,27,constrict,4.0,pound,4.0,ponyta,charmander,1,4,69.6969696969697,10,4
+4,23,horn attack,15.0,,,ponyta,charmander,1,4,69.6969696969697,10,4
+1,40,petal dance,17.0,,,vileplume,bulbasaur,1,1,100.0,1,5
+1,40,petal dance,52.0,,,lickitung,bulbasaur,1,1,100.0,2,5
+1,40,fury attack,6.0,tri attack,6.0,lickitung,bulbasaur,1,2,85.0,3,5
+2,34,explosion,42.0,,,lickitung,bulbasaur,1,2,85.0,3,5
+1,40,petal dance,111.0,,,electrode,bulbasaur,1,1,100.0,4,5
+1,40,fury attack,,water gun,6.0,slowpoke,bulbasaur,0,4,0.0,5,5
+2,34,explosion,19.0,rage,7.0,slowpoke,bulbasaur,0,4,0.0,5,5
+3,27,explosion,18.0,water gun,6.0,slowpoke,bulbasaur,0,4,0.0,5,5
+4,21,fury attack,3.0,mega punch,25.0,slowpoke,bulbasaur,0,4,0.0,5,5
+1,40,petal dance,54.0,,,meowth,bulbasaur,1,1,100.0,6,5
+1,40,double-edge,16.0,quick attack,7.0,ivysaur,bulbasaur,0,4,0.0,7,5
+2,33,fury attack,4.0,comet punch,,ivysaur,bulbasaur,0,4,0.0,7,5
+3,33,fury attack,3.0,explosion,29.0,ivysaur,bulbasaur,0,4,0.0,7,5
+4,4,double-edge,15.0,comet punch,4.0,ivysaur,bulbasaur,0,4,0.0,7,5
+1,40,double-edge,16.0,double slap,6.0,pidgeotto,bulbasaur,1,3,55.00000000000001,8,5
+2,34,double-edge,17.0,quick attack,12.0,pidgeotto,bulbasaur,1,3,55.00000000000001,8,5
+3,22,explosion,25.0,,,pidgeotto,bulbasaur,1,3,55.00000000000001,8,5
+1,40,double-edge,15.0,mega punch,17.0,slowpoke,bulbasaur,1,3,35.0,9,5
+2,23,double-edge,14.0,tri attack,9.0,slowpoke,bulbasaur,1,3,35.0,9,5
+3,14,explosion,45.0,,,slowpoke,bulbasaur,1,3,35.0,9,5
+1,40,petal dance,155.0,,,sandshrew,bulbasaur,1,1,100.0,10,5
+1,18,body slam,6.0,slash,21.0,nidoran♂,charmander,0,1,0.0,1,6
+1,18,horn attack,3.0,slash,49.0,poliwhirl,charmander,0,1,0.0,2,6
+1,18,constrict,1.0,pay day,16.0,rhyhorn,charmander,0,2,0.0,3,6
+2,2,quick attack,1.0,struggle,18.0,rhyhorn,charmander,0,2,0.0,3,6
+1,18,quick attack,3.0,bind,6.0,lickitung,charmander,0,2,0.0,4,6
+2,12,constrict,2.0,tri attack,19.0,lickitung,charmander,0,2,0.0,4,6
+1,18,quick attack,4.0,gust,5.0,kakuna,charmander,0,4,0.0,5,6
+2,13,quick attack,3.0,gust,5.0,kakuna,charmander,0,4,0.0,5,6
+3,8,constrict,2.0,gust,5.0,kakuna,charmander,0,4,0.0,5,6
+4,3,body slam,6.0,gust,10.0,kakuna,charmander,0,4,0.0,5,6
+1,18,constrict,2.0,tri attack,49.0,pidgeot,charmander,0,1,0.0,6,6
+1,18,horn attack,0.0,sludge,6.0,haunter,charmander,0,4,0.0,7,6
+2,12,body slam,0.0,explosion,6.0,haunter,charmander,0,4,0.0,7,6
+3,6,horn attack,0.0,razor wind,4.0,haunter,charmander,0,4,0.0,7,6
+4,2,constrict,0.0,razor wind,4.0,haunter,charmander,0,4,0.0,7,6
+1,18,constrict,2.0,mega punch,42.0,exeggutor,charmander,0,1,0.0,8,6
+1,18,constrict,2.0,cut,7.0,lapras,charmander,0,3,0.0,9,6
+2,11,constrict,2.0,cut,6.0,lapras,charmander,0,3,0.0,9,6
+3,5,constrict,2.0,cut,7.0,lapras,charmander,0,3,0.0,9,6
+1,18,horn attack,4.0,bubble,11.0,slowbro,charmander,0,3,0.0,10,6
+2,7,quick attack,3.0,double slap,3.0,slowbro,charmander,0,3,0.0,10,6
+3,4,horn attack,4.0,waterfall,35.0,slowbro,charmander,0,3,0.0,10,6
+1,30,double slap,,vice grip,8.0,parasect,squirtle,0,4,0.0,1,7
+2,22,double slap,,slam,10.0,parasect,squirtle,0,4,0.0,1,7
+3,12,barrage,3.0,slam,11.0,parasect,squirtle,0,4,0.0,1,7
+4,1,double slap,,quick attack,6.0,parasect,squirtle,0,4,0.0,1,7
+1,30,crabhammer,8.0,tackle,9.0,omastar,squirtle,0,4,0.0,2,7
+2,21,double slap,1.0,tackle,8.0,omastar,squirtle,0,4,0.0,2,7
+3,13,double slap,1.0,tackle,8.0,omastar,squirtle,0,4,0.0,2,7
+4,5,crabhammer,8.0,tackle,8.0,omastar,squirtle,0,4,0.0,2,7
+1,30,crabhammer,31.0,,,sandslash,squirtle,1,1,100.0,3,7
+1,30,barrage,2.0,double slap,7.0,kangaskhan,squirtle,0,4,0.0,4,7
+2,23,double slap,2.0,comet punch,9.0,kangaskhan,squirtle,0,4,0.0,4,7
+3,14,hyper beam,17.0,comet punch,9.0,kangaskhan,squirtle,0,4,0.0,4,7
+4,5,double slap,2.0,comet punch,19.0,kangaskhan,squirtle,0,4,0.0,4,7
+1,30,hyper beam,19.0,double slap,3.0,arcanine,squirtle,1,2,90.0,5,7
+2,27,hyper beam,17.0,,,arcanine,squirtle,1,2,90.0,5,7
+1,30,barrage,3.0,spike cannon,4.0,exeggutor,squirtle,0,4,0.0,6,7
+2,26,double slap,3.0,thrash,15.0,exeggutor,squirtle,0,4,0.0,6,7
+3,11,hyper beam,12.0,spike cannon,4.0,exeggutor,squirtle,0,4,0.0,6,7
+4,7,double slap,3.0,thrash,16.0,exeggutor,squirtle,0,4,0.0,6,7
+1,30,barrage,,slam,22.0,venomoth,squirtle,0,2,0.0,7,7
+2,8,crabhammer,,pound,12.0,venomoth,squirtle,0,2,0.0,7,7
+1,30,crabhammer,27.0,comet punch,5.0,jigglypuff,squirtle,1,2,83.33333333333334,8,7
+2,25,hyper beam,26.0,,,jigglypuff,squirtle,1,2,83.33333333333334,8,7
+1,30,hyper beam,61.0,,,poliwag,squirtle,1,1,100.0,9,7
+1,30,barrage,6.0,mega punch,11.0,chansey,squirtle,1,2,63.33333333333333,10,7
+2,19,crabhammer,54.0,,,chansey,squirtle,1,2,63.33333333333333,10,7
+1,30,double slap,3.0,vice grip,11.0,grimer,squirtle,0,4,0.0,1,8
+2,19,double slap,3.0,smog,7.0,grimer,squirtle,0,4,0.0,1,8
+3,12,barrage,,smog,7.0,grimer,squirtle,0,4,0.0,1,8
+4,5,crabhammer,15.0,egg bomb,23.0,grimer,squirtle,0,4,0.0,1,8
+1,30,hyper beam,14.0,bite,7.0,vaporeon,squirtle,1,3,56.666666666666664,2,8
+2,23,hyper beam,14.0,vice grip,6.0,vaporeon,squirtle,1,3,56.666666666666664,2,8
+3,17,hyper beam,14.0,,,vaporeon,squirtle,1,3,56.666666666666664,2,8
+1,30,double slap,5.0,slam,2.0,shellder,squirtle,1,2,93.33333333333333,3,8
+2,28,hyper beam,55.0,,,shellder,squirtle,1,2,93.33333333333333,3,8
+1,30,double slap,2.0,strength,29.0,blastoise,squirtle,0,2,0.0,4,8
+2,1,double slap,2.0,cut,17.0,blastoise,squirtle,0,2,0.0,4,8
+1,30,double slap,3.0,headbutt,10.0,porygon,squirtle,0,4,0.0,5,8
+2,20,double slap,3.0,headbutt,12.0,porygon,squirtle,0,4,0.0,5,8
+3,8,hyper beam,17.0,barrage,4.0,porygon,squirtle,0,4,0.0,5,8
+4,4,barrage,3.0,stomp,10.0,porygon,squirtle,0,4,0.0,5,8
+1,30,barrage,1.0,take down,24.0,kabutops,squirtle,0,3,0.0,6,8
+2,6,barrage,1.0,fury attack,5.0,kabutops,squirtle,0,3,0.0,6,8
+3,1,hyper beam,7.0,fury swipes,7.0,kabutops,squirtle,0,3,0.0,6,8
+1,30,hyper beam,35.0,,,machoke,squirtle,1,1,100.0,7,8
+1,30,barrage,4.0,quick attack,3.0,venonat,squirtle,1,4,73.33333333333333,8,8
+2,27,double slap,5.0,bite,3.0,venonat,squirtle,1,4,73.33333333333333,8,8
+3,24,barrage,5.0,constrict,2.0,venonat,squirtle,1,4,73.33333333333333,8,8
+4,22,double slap,4.0,,,venonat,squirtle,1,4,73.33333333333333,8,8
+1,30,crabhammer,61.0,,,rapidash,squirtle,1,1,100.0,9,8
+1,30,crabhammer,21.0,take down,,mewtwo,squirtle,1,2,100.0,10,8
+2,30,double slap,4.0,,,mewtwo,squirtle,1,2,100.0,10,8
+1,37,tri attack,29.0,,,ekans,pikachu,1,1,100.0,1,9
+1,37,struggle,28.0,,,machamp,pikachu,1,1,100.0,2,9
+1,37,comet punch,1.0,earthquake,207.0,rhydon,pikachu,0,1,0.0,3,9
+1,37,mega kick,18.0,fury attack,5.0,venusaur,pikachu,0,4,0.0,4,9
+2,32,tri attack,10.0,stomp,17.0,venusaur,pikachu,0,4,0.0,4,9
+3,15,comet punch,4.0,fury attack,5.0,venusaur,pikachu,0,4,0.0,4,9
+4,10,struggle,8.0,stomp,17.0,venusaur,pikachu,0,4,0.0,4,9
+1,37,tri attack,14.0,slash,13.0,dragonair,pikachu,0,2,0.0,5,9
+2,24,tri attack,16.0,explosion,30.0,dragonair,pikachu,0,2,0.0,5,9
+1,37,tri attack,71.0,,,squirtle,pikachu,1,1,100.0,6,9
+1,37,tri attack,27.0,,,vulpix,pikachu,1,1,100.0,7,9
+1,37,tri attack,11.0,spike cannon,19.0,arbok,pikachu,0,3,0.0,8,9
+2,18,comet punch,3.0,barrage,7.0,arbok,pikachu,0,3,0.0,8,9
+3,11,mega kick,17.0,horn attack,28.0,arbok,pikachu,0,3,0.0,8,9
+1,37,struggle,10.0,pound,25.0,rattata,pikachu,1,2,32.432432432432435,9,9
+2,12,tri attack,39.0,,,rattata,pikachu,1,2,32.432432432432435,9,9
+1,37,struggle,30.0,,,eevee,pikachu,1,1,100.0,10,9
+1,19,crabhammer,10.0,self-destruct,73.0,marowak,squirtle,0,1,0.0,1,10
+1,19,barrage,,mega kick,35.0,goldeen,squirtle,0,1,0.0,2,10
+1,19,double slap,3.0,bubble,1.0,shellder,squirtle,1,4,63.1578947368421,3,10
+2,18,barrage,3.0,slam,3.0,shellder,squirtle,1,4,63.1578947368421,3,10
+3,15,double slap,3.0,horn attack,3.0,shellder,squirtle,1,4,63.1578947368421,3,10
+4,12,hyper beam,25.0,,,shellder,squirtle,1,4,63.1578947368421,3,10
+1,19,hyper beam,6.0,petal dance,116.0,bulbasaur,squirtle,0,1,0.0,4,10
+1,19,barrage,2.0,self-destruct,133.0,pinsir,squirtle,0,1,0.0,5,10
+1,19,hyper beam,6.0,pay day,17.0,arcanine,squirtle,0,2,0.0,6,10
+2,2,hyper beam,6.0,constrict,5.0,arcanine,squirtle,0,2,0.0,6,10
+1,19,double slap,2.0,pay day,11.0,meowth,squirtle,0,2,0.0,7,10
+2,8,double slap,,bite,14.0,meowth,squirtle,0,2,0.0,7,10
+1,19,hyper beam,6.0,fury swipes,11.0,sandslash,squirtle,0,2,0.0,8,10
+2,8,barrage,2.0,double-edge,51.0,sandslash,squirtle,0,2,0.0,8,10
+1,19,double slap,,headbutt,4.0,seadra,squirtle,1,4,15.789473684210526,9,10
+2,15,crabhammer,6.0,hyper beam,8.0,seadra,squirtle,1,4,15.789473684210526,9,10
+3,7,crabhammer,7.0,take down,4.0,seadra,squirtle,1,4,15.789473684210526,9,10
+4,3,double slap,3.0,,,seadra,squirtle,1,4,15.789473684210526,9,10
+1,19,hyper beam,6.0,gust,19.0,exeggcute,squirtle,0,1,0.0,10,10

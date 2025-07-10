@@ -1,6 +1,5 @@
 import os
 import json
-import pickle
 from copy import deepcopy
 import random
 import argparse
@@ -8,31 +7,28 @@ import pandas as pd
 from tqdm import tqdm
 from pokemon_character import PokemonCharacter
 
-def pokemon_from_dict(pokemon_dict):
+def to_pokemon_character(row_df):
     """
-    Initializes a PokemonCharacter object from an input dictionary with its information.
+    Converts the row of a dataframe with pokemon information into a PokemonCharacter object.
 
     Parameters:
-    - pokemon_dict: dictionary that must have the following entries:
-                    - name: string with the name of the pokemon;
-                    - baseStast: dictionary with the basic statistics of the pokemon;
-                    - moves: list of dictionaries representing the moves of the pokemon;
-                    - national_pokedex_number: integer resperenting the national pokedex number of the pokemon;
-                    - types: list of strings with the types of the pokemon.
-    
+    - row_df: row of a pandas dataframe with all information about a pokemon.
+
     Returns:
-    - pokemon: PokemonCharacter initialized with the input information.
+    - pokemon: PokemonCharacter with all information in the input row about a pokemon.
     """
 
-    # initialize a PokemonCharacter with the input information
+    # instantiate a PokemonCharacter object with the input information
     pokemon = PokemonCharacter(
-        name=pokemon_dict["name"],
-        national_pokedex_number=pokemon_dict["national_pokedex_number"],
-        types=pokemon_dict["types"],
-        base_stats=pokemon_dict["baseStats"],
-        moves=pokemon_dict["moves"]
+        name=row_df["name"],
+        base_stats=row_df["baseStats"],
+        moves=row_df["moves"],
+        national_pokedex_number=row_df["national_pokedex_number"],
+        types=row_df["types"],
+        level=row_df["level"]
     )
 
+    # return the PokemonCharacter object
     return pokemon
 
 def load_moves(path):
@@ -72,9 +68,9 @@ def load_moves(path):
                 moves.append(move)
 
     # return the loaded moves in a pandas dataframe
-    return 
+    return pd.DataFrame(moves)
 
-def load_pokemon(path, moves):
+def load_pokemons(path, moves):
     """
     Loads a dataset of pokemons from a .json file.
     It adds the entry with key "level" and value 1 to each dictionary representing a pokemon.
@@ -84,11 +80,11 @@ def load_pokemon(path, moves):
     - path: path to the .json file with the pokemons to be loaded.
 
     Returns:
-    - pokemons: dictionary of dictionaries with each dictionary that represents a different pokemon.
+    - pokemons: dataframe with each entry that represents a different pokemon.
     """
 
-    # initialize the dictionary that will contain the loaded pokemons
-    pokemons = {}
+    # initialize the list that will contain the loaded pokemons
+    pokemons = []
 
     # open the .json file
     with open(path, "r") as file:
@@ -103,12 +99,13 @@ def load_pokemon(path, moves):
             curr_pokemon["level"] = 1
 
             # add to the loaded pokemon 4 moves sampled uniformly at random from the input moves that have the same types of the current pokemon or of type "normal"
-            curr_pokemon["moves"] = random.sample([move for move in moves.values() if move["type"] in curr_pokemon["types"] or move["type"] == "normal"], 4)
+            curr_pokemon["moves"] = moves[(moves["type"] == "normal") | (moves["type"].isin(curr_pokemon["types"]))].sample(n=4, random_state=random.randint(0, 10000)).to_dict(orient="records")
             
-            # convert the current pokemon into a PokemonCharacter object and add it to the dictionary of pokemons
-            pokemons[curr_pokemon["name"]] = pokemon_from_dict(curr_pokemon)
+            # append the current pokemon to the list of pokemons
+            pokemons.append(curr_pokemon)
 
-    return pokemons
+    # return the loaded pokemons as a pandas dataframe
+    return pd.DataFrame(pokemons)
 
 def load_type_effectiveness(path):
     """
@@ -118,12 +115,11 @@ def load_type_effectiveness(path):
     - path: path to the .json file with the data to be loaded.
 
     Returns:
-    - data: dictionary with the input data.
-            Given an attack type "a" and a defend type "d", the effectiveness value is data["a"]["b"].
+    - data: pandas dataframe with the input data. Each row is a different (attack_type, defend_type) pair.
     """
 
-    # initialize the dictionary that will contain the loaded data
-    data = {}
+    # initialize the list that will contain the loaded data
+    data = []
 
     # open the .json file
     with open(path, "r") as file:
@@ -134,13 +130,11 @@ def load_type_effectiveness(path):
             # convert the line into a dictionary
             pair = json.loads(line)
 
-            # add the pair to the dictionary
-            if pair["attack"] in data:
-                data[pair["attack"]][pair["defend"]] = pair["effectiveness"]
-            else:
-                data[pair["attack"]] = {pair["defend"]: pair["effectiveness"]}
+            # append the pair to the list
+            data.append(pair)
 
-    return data
+    # return the loaded type effectivenesses after having converted them into a pandas dataframe
+    return pd.DataFrame(data)
 
 def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
     """
@@ -150,91 +144,114 @@ def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
 
     Parameters:
     - input_pokemon: PokemonCharacter object representing the pokemon that has to fight against a wild pokemon.
-    - wild_pokemons: list of dictionaries representing the wild pokemons that can be encountered.
-    - type_effectiveness: dictionary with the effectivenesses of moves given the move type "move_type" and the defender pokemon's types.
-                          type_effectiveness["move_type"]["defender_type"] is the float representing the effectiveness.
+    - wild_pokemons: pandas dataframe representing the wild pokemons that can be encountered.
+    - type_effectiveness: pandas dataframe with the effectivenesses of moves given the move type "move_type" and the defender pokemon's types.
 
     Returns:
     - wild_pokemon_name: string with the name of the sampled wild pokemon to fight against the input pokemon.
-    - battle_outcome: boolean indicating whether the battle is won by the input pokemon or not.
+    - battle_outcome: integer with a binary value indicating whether the battle is won (1) by the input pokemon or not (0).
     - n_turns: integer with the total number of turns in the battle.
     - residual_HP_percentage: float with the percentage of residual HP of the input pokemon after the battle.
+    - data_all_turns: list that contains the residual hps of the input pokemon, the attacks perfomed by both pokemons and the damage inflicted by both pokemons at each turn.
+                      data_all_turns[i] is a dictionary with all information about turn i.
     """
         
-    # sample uniformly at random a wild pokemon among the input ones, making a copy so to keep modifications only in the current battle
-    sampled_pokemon = deepcopy(wild_pokemons[random.choice(list(wild_pokemons.keys()))])
+    # sample uniformly at random a wild pokemon and a level in [1, 20], making a copy so to keep modifications only in the current battle
+    sampled_pokemon = deepcopy(wild_pokemons.sample(random_state=random.randint(0, 10000)).iloc[0])
+    sampled_pokemon["level"] = random.randint(1, 20)
+    sampled_pokemon = to_pokemon_character(sampled_pokemon)
+
+    # initialize the lists that will contain data for each turn
+    data_all_turns = []
 
     # initialize the number of turns of the battle
     n_turns = 1
 
     # start the battle and end it when one of the two pokemons has been defeated
     while True:
+
+        # add the turn number and the current hps of the input pokemon to dictionary with the information related to the current turn
+        curr_turn_info = {"Turn": n_turns, "Starter Initial HPs": input_pokemon.curr_hp}
         
-        # make the input pokemon attack the wild pokemon with a move chosen uniformly at random among those available
-        input_pokemon.use_move(random.choice([move["name"] for move in input_pokemon.moves]), sampled_pokemon, type_effectiveness)
+        # make the input pokemon attack the wild pokemon with a move chosen uniformly at random and add the information to the dictionary
+        chosen_move = random.choice([move["name"] for move in input_pokemon.moves])
+        curr_turn_info["Starter Move"] = chosen_move
+        curr_turn_info["Starter Damage Inflicted"] = input_pokemon.use_move(chosen_move, sampled_pokemon, type_effectiveness)
 
         # check whether the wild pokemon is defeated and end the battle in this case
         if sampled_pokemon.curr_hp <= 0:
-            return sampled_pokemon.name, True, n_turns, input_pokemon.curr_hp / input_pokemon.base_stats["hp"] * 100
+            curr_turn_info["Wild Move"] = None
+            curr_turn_info["Wild Damage Inflicted"] = None
+            data_all_turns.append(curr_turn_info)
+            return sampled_pokemon.name, 1, n_turns, input_pokemon.curr_hp / input_pokemon.active_stats["hp"] * 100, data_all_turns
         
-        # make the wild pokemon attack the input pokemon with a move sampled uniformly at random among the available ones
-        sampled_pokemon.use_move(random.choice([move["name"] for move in sampled_pokemon.moves]), input_pokemon, type_effectiveness)
+        # make the wild pokemon attack the input pokemon with a move sampled uniformly at random and add the information to the dictionary
+        chosen_move = random.choice([move["name"] for move in sampled_pokemon.moves])
+        curr_turn_info["Wild Move"] = chosen_move
+        curr_turn_info["Wild Damage Inflicted"] = sampled_pokemon.use_move(chosen_move, input_pokemon, type_effectiveness)
+        data_all_turns.append(curr_turn_info)
     
         # check whether the input pokemon is defeated and end the battle in this case
         if input_pokemon.curr_hp <= 0:
-            return sampled_pokemon.name, False, n_turns, 0
+            return sampled_pokemon.name, 0, n_turns, 0, data_all_turns
 
         # update the number of turns
         n_turns += 1
 
 def run_simulation(n_games, n_battles, starter_pokemons, wild_pokemons, type_effectiveness):
     """
-    Simulates n_battles with the input starter pokemon against randomly sampled wild pokemons.
+    Simulates n_battles battles for each of n_games games against randomly sampled wild pokemons.
+    At the beginning of each battle, a starter pokemon is selected uniformly at random among the input ones.
+    The starter pokemon selected at the beginning of the game takes part in all the n_battles battles of the game.
     After each battle, the trainer goes to the pokemon center.
-    After that n_battles with the input starter pokemon have been completed, the game ends.
+    After that n_battles have been completed, the game ends.
 
     Parameters:
-    - n_games: integer representing the number of games to run for each input starter pokemon.
+    - n_games: integer representing the number of games to run.
     - n_battles: integer representing the number of battles to be performed in each single game.
-    - starter_pokemons: list of PokemonCharacter objects with the starter pokemons that have to be used.
-    - wild_pokemons: dictionary with the wild pokemons.
-    - type_effectiveness: dictionary with the effectiveness of a move given its type and the types of the opponent pokemon.
+    - starter_pokemons: pandas Series of dictionaries with information about the starter pokemons that have to be considered.
+    - wild_pokemons: pandas dataframe with the wild pokemons.
+    - type_effectiveness: pandas dataframe with the effectiveness of a move given its type and the types of the opponent pokemon.
 
     Returns:
-    - collected_data: list of dictionaries with all data collected in the simulation.
-                      Each dictionary stores data for a given battle in a given game of a given starter pokemon.
+    - collected_data: pandas dataframe with all data collected in the simulation.
+                      Each row stores information about a single turn of a battle in a game.
     """
 
-    # list that will contain all useful information across all battleas in all games and for all starter pokemons
+    # list that will contain all useful information across all battles in all games
     collected_data = []
 
-    # run n_games games for each input starter pokemon
-    for starter in starter_pokemons:
+    # run n_games games
+    for j in tqdm(range(1, n_games + 1), desc=f"Running the Simulation", unit="game"):
 
-        # run n_games games
-        for j in tqdm(range(1, n_games + 1), desc=f"Simulation {starter.name}", unit="game"):
+        # sample uniformly at random a starter pokemon and set its level to a random value in [1, 20]
+        starter = starter_pokemons.sample(random_state=random.randint(0, 10000)).iloc[0]
+        starter["level"] = random.randint(1, 20)
+        starter = to_pokemon_character(starter)
 
-            # run n_battles battles before exiting the game
-            for k in range(1, n_battles + 1):
+        # run n_battles battles before exiting the game
+        for k in range(1, n_battles + 1):
 
-                # run the battle and append the collected data
-                wild_pokemon_name, outcome, n_turns, residual_HP = random_battle(starter, wild_pokemons, type_effectiveness)
-                collected_data.append(
-                    {
-                        "Starter Pokemon": starter.name,
-                        "Wild Pokemon": wild_pokemon_name,
-                        "Battle Outcome": outcome,
-                        "Battle Turns": n_turns,
-                        "Residual HP": residual_HP,
-                        "Battle": k,
-                        "Game": j
-                    }
-                )
+            # run the battle and collect data
+            wild_pokemon_name, outcome, n_turns, residual_HP, turns_data = random_battle(starter, wild_pokemons, type_effectiveness, random_seed)
 
-                # make the trainer go to the pokemon center to heal the starter pokemon after the battle
-                starter.curr_hp = starter.base_stats["hp"]
+            # add the data related to the entire battle to each dictionary with information for a single turn
+            for turn in turns_data:
+                turn["Wild Pokemon"] = wild_pokemon_name
+                turn["Starter Pokemon"] = starter.name
+                turn["Battle Outcome"] = outcome
+                turn["Battle Turns"] = n_turns
+                turn["Residual HP"] = residual_HP
+                turn["Battle"] = k
+                turn["Game"] = j
 
-    return collected_data
+            # extend the list with data for all turns battles with data for the current battle
+            collected_data.extend(turns_data)
+
+            # make the trainer go to the pokemon center to heal the starter pokemon after the battle
+            starter.curr_hp = starter.active_stats["hp"]
+
+    return pd.DataFrame(collected_data)
 
 def parse_args():
     """
@@ -253,7 +270,8 @@ def parse_args():
     parser.add_argument("--input_pokemons", type=str, required=False, default=os.path.join("..", "data", "pokemons.json"), help="Path to the dataset with pokemons.")
     parser.add_argument("--input_moves", type=str, required=False, default=os.path.join("..", "data", "moves.json"), help="Path to the dataset with moves.")
     parser.add_argument("--input_type_effectiveness", type=str, required=False, default=os.path.join("..", "data", "type_effectiveness.json"), help="Path to the dataset with type effectiveness pairs.")
-    parser.add_argument("--output_data", type=str, required=False, default=os.path.join("results", "collected_data.pickle"), help="Path to the file where to save the collected data.")
+    parser.add_argument("--output_data", type=str, required=False, default=os.path.join("results", "collected_data.csv"), help="Path to the file where to save the collected data.")
+    parser.add_argument("--random_seed", type=int, required=False, default=27, help="Random seed for reproducibility.")
                           
     return parser.parse_args()
 
@@ -262,19 +280,20 @@ if __name__ == '__main__':
     # parse command line arguments
     args = parse_args()
 
+    # set a random seed for reproducibility
+    random.seed(args.random_seed)
+
     # load pokemons, moves and type effectiveness data from .json files
     moves = load_moves(args.input_moves)
-    pokemons = load_pokemon(args.input_pokemons, moves)
+    pokemons = load_pokemons(args.input_pokemons, moves)
     type_effectiveness = load_type_effectiveness(args.input_type_effectiveness)
 
     # starter pokemons
-    starter_pokemons = [p for p in pokemons.values() if p.name in ["bulbasaur", "charmander", "squirtle", "pikachu"]]
+    starter_pokemons = pokemons[pokemons["name"].isin(["bulbasaur", "charmander", "squirtle", "pikachu"])]
 
     # run the simulation
-    collected_data = run_simulation(args.n_games, args.n_battles, starter_pokemons, pokemons, type_effectiveness)
+    collected_data = run_simulation(args.n_games, args.n_battles, starter_pokemons, pokemons, type_effectiveness, args.random_seed)
 
     # save the collected data
     os.makedirs(os.path.dirname(args.output_data), exist_ok=True)
-    pickle_out = open(args.output_data, "wb")
-    pickle.dump(collected_data, pickle_out)
-    pickle_out.close()
+    collected_data.to_csv(args.output_data, index=False)
