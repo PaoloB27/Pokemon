@@ -29,14 +29,7 @@ def simple_plot(data, save_path):
     
     # plot the values
     sns.set_style("whitegrid")
-    ax = sns.barplot(data=plot_df, x="Starter Pokemon", y="Average Wins")
-
-
-    # add the values on top of each bar
-    for container in ax.containers:
-        ax.bar_label(container, fmt='%.1f', label_type='edge', padding=1)
-
-    # plot settings
+    sns.pointplot(data=plot_df, x="Starter Pokemon", y="Average Wins", linestyles="none")
     plt.title(f"Number of Wins in {data["Battle"].max()} Battles Averaged over {data["Game"].max()} Games")
     plt.ylabel("Average Wins")
     plt.xlabel("Starter Pokemon")
