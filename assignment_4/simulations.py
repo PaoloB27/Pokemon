@@ -149,6 +149,7 @@ def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
 
     Returns:
     - wild_pokemon_name: string with the name of the sampled wild pokemon to fight against the input pokemon.
+    - wild_pokemon_level: integer with the level ofthe wild pokemon.
     - battle_outcome: integer with a binary value indicating whether the battle is won (1) by the input pokemon or not (0).
     - n_turns: integer with the total number of turns in the battle.
     - residual_HP_percentage: float with the percentage of residual HP of the input pokemon after the battle.
@@ -183,7 +184,7 @@ def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
             curr_turn_info["Wild Move"] = None
             curr_turn_info["Wild Damage Inflicted"] = None
             data_all_turns.append(curr_turn_info)
-            return sampled_pokemon.name, 1, n_turns, input_pokemon.curr_hp / input_pokemon.active_stats["hp"] * 100, data_all_turns
+            return sampled_pokemon.name, sampled_pokemon.level, 1, n_turns, input_pokemon.curr_hp / input_pokemon.active_stats["hp"] * 100, data_all_turns
         
         # make the wild pokemon attack the input pokemon with a move sampled uniformly at random and add the information to the dictionary
         chosen_move = random.choice([move["name"] for move in sampled_pokemon.moves])
@@ -193,7 +194,7 @@ def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
     
         # check whether the input pokemon is defeated and end the battle in this case
         if input_pokemon.curr_hp <= 0:
-            return sampled_pokemon.name, 0, n_turns, 0, data_all_turns
+            return sampled_pokemon.name, sampled_pokemon.level, 0, n_turns, 0, data_all_turns
 
         # update the number of turns
         n_turns += 1
@@ -233,12 +234,14 @@ def run_simulation(n_games, n_battles, starter_pokemons, wild_pokemons, type_eff
         for k in range(1, n_battles + 1):
 
             # run the battle and collect data
-            wild_pokemon_name, outcome, n_turns, residual_HP, turns_data = random_battle(starter, wild_pokemons, type_effectiveness)
+            wild_pokemon_name, wild_pokemon_level, outcome, n_turns, residual_HP, turns_data = random_battle(starter, wild_pokemons, type_effectiveness)
 
             # add the data related to the entire battle to each dictionary with information for a single turn
             for turn in turns_data:
                 turn["Wild Pokemon"] = wild_pokemon_name
+                turn["Wild Level"] = wild_pokemon_level
                 turn["Starter Pokemon"] = starter.name
+                turn["Starter Level"] = starter.level
                 turn["Battle Outcome"] = outcome
                 turn["Battle Turns"] = n_turns
                 turn["Residual HP"] = residual_HP
