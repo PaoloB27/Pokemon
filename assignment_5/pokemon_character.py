@@ -1,6 +1,6 @@
 import random
 import math
-# from utils import type_text
+from utils import type_text
 
 class PokemonCharacter:
     """
@@ -83,7 +83,7 @@ class PokemonCharacter:
         
         return act_stats
 
-    def use_move(self, move_name, opponent_pokemon, type_effectiveness):
+    def use_move(self, move_name, opponent_pokemon, type_effectiveness, verbose=True):
         """
         Use the input move to attack the opponent pokemon.
 
@@ -91,9 +91,7 @@ class PokemonCharacter:
         - move_name: string with the name of the move to be used.
         - opponent_pokemon: PokemonCharacter object representing the pokemon that is being attacked.
         - type_effectiveness: pandas dataframe with type effectivenesses of moves.
-        
-        Returns:
-        - damage: integer with the damage inflicted by the move.
+        - verbose: boolean indicating whether information about the move has to be printed or not.
         """
 
         # get the selected move from the moves of the pokemon
@@ -103,8 +101,9 @@ class PokemonCharacter:
                 move = m
                 break
 
-        # # print some information about the move
-        # type_text(f"{self.name} uses {move_name}!\n")
+        # print some information about the move
+        if verbose:
+            type_text(f"{self.name} uses {move_name}!\n")
 
         # # reduce the power points (pp) of the move, independently of whether the move succeeds or not
         # self.curr_pps[move_name] -= 1
@@ -129,11 +128,11 @@ class PokemonCharacter:
             # apply the damage to the opponent pokemon
             opponent_pokemon.curr_hp -= damage
 
-            # # print some information about the move
-            # type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
+            # print some information about the move
+            if verbose:
+                type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
         
-        # # if the move fails, just print information
-        # else:
-        #     type_text(f"{self.name}'s {move_name} missed!\n")
-
-            return damage
+            # if the move fails, just print information
+            else:
+                if verbose:
+                    type_text(f"{self.name}'s {move_name} missed!\n")
