@@ -4,9 +4,12 @@ import argparse
 import random
 import pandas as pd
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 from scipy.stats.distributions import randint
 
 def encode_types(dataset):
@@ -52,28 +55,37 @@ def hyper_params_search(X_train, y_train):
     # perform a grid search to find the best set of hyper-parameters using cross validation
     hyper_params_grid = {"n_estimators": randint(50, 1000), "max_depth": randint(1, 50)}
     clf = RandomForestClassifier()
-    random_search = RandomizedSearchCV(clf, param_distributions=hyper_params_grid, n_iter=20, cv=5, verbose=4)
+    random_search = RandomizedSearchCV(clf, param_distributions={"n_estimators": [1], "max_depth": [2]}, n_iter=20, cv=5, verbose=4, n_jobs=8)
     random_search.fit(X_train, y_train)
     print(f"\nBest hyperparameters: {random_search.best_params_}")
     
     # return the best estimator re-trained on the whole training set
     return random_search.best_estimator_
 
-def evaluate_model(y_pred, y_true):
+def evaluate_model(y_pred, y_true, save_dir):
     """
     Evaluates the input predictions by comparing them to the ground truth.
 
     Parameters:
     - y_pred: array with the predicted outcomes.
     - y_true: array with the true outcomes.
+    - save_dir: path to the directory where to save evaluation plots.
     """
 
-    # accuracy
-    print(f"Accuracy: {accuracy_score(y_true, y_pred)}")
+    # print the classification report
+    print(f"\nClassification Report on the test set:\n: {classification_report(y_true, y_pred)}")
 
-    # plot the confusion matrix
+    # create and save the confusion matrix
+    sns.set_style("whitegrid")
+    sns.heatmap(data=confusion_matrix(y_true, y_pred), cmap="Reds", annot=True)
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.title("Confusion Matrix Test Set")
+    plt.savefig(os.path.join(save_dir, "confusion_matrix_test_set.jpg"), dpi=350)
 
+    # plot roc_auc
 
+    # plot importances (see lecture slides)
 
 def parse_args():
     """
