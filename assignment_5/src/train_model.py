@@ -51,7 +51,7 @@ def hyper_params_search(X_train, y_train, save_path):
     # perform a grid search to find the best set of hyper-parameters using cross validation
     hyper_params_grid = {"n_estimators": randint(50, 1000), "max_depth": randint(1, 50)}
     clf = RandomForestClassifier()
-    random_search = RandomizedSearchCV(clf, param_distributions={"n_estimators": [1], "max_depth": [2]}, n_iter=1, cv=2, verbose=4, n_jobs=8)
+    random_search = RandomizedSearchCV(clf, param_distributions=hyper_params_grid, n_iter=20, cv=5, verbose=4, n_jobs=8)
     random_search.fit(X_train, y_train)
     print(f"\nBest hyperparameters: {random_search.best_params_}")
 
