@@ -49,7 +49,7 @@ def hyper_params_search(X_train, y_train, save_path):
     """
 
     # perform a grid search to find the best set of hyper-parameters using cross validation
-    hyper_params_grid = {"n_estimators": randint(50, 1000), "max_depth": randint(1, 50)}
+    hyper_params_grid = {"n_estimators": randint(50, 1000), "max_depth": randint(1, 30)}
     clf = RandomForestClassifier()
     random_search = RandomizedSearchCV(clf, param_distributions=hyper_params_grid, n_iter=20, cv=5, verbose=4, n_jobs=8)
     random_search.fit(X_train, y_train)
@@ -101,8 +101,8 @@ if __name__ == '__main__':
     print("Preparing data ...")
     dataset = encode_types(dataset)
 
-    # divide the features from the battle outcomes
-    X = dataset.drop(columns=["outcome"])
+    # extract features and battle outcomes
+    X = dataset.drop(columns=["outcome", "game", "battle"])
     y = dataset["outcome"]
 
     # split data into a training and a test set and save the indices of test samples

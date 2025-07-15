@@ -82,7 +82,7 @@ def parse_args():
     parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("..", "data", "collected_data.csv"), help="Path to the input dataset with data collected from a simulation.")
     parser.add_argument("-m", "--model_path", type=str, required=False, default=os.path.join("..", "model", "model.pickle"), help="Path to the file where the trained model is saved.")
     parser.add_argument("-t", "--test_indices_path", type=str, required=False, default=os.path.join("..", "data", "test_indices.npy"), help="Path to the file with the indices of the test samples in the original dataset.")
-    parser.add_argument("-p", "--plots_dir", type=str, required=False, default="./results", help="Path to the directory where to save the generated plots.")
+    parser.add_argument("-p", "--plots_dir", type=str, required=False, default=os.path.join("..", "results"), help="Path to the directory where to save the generated plots.")
     parser.add_argument("-r", "--random_seed", type=int, required=False, default=27, help="Random seed for reproducibility.")
                           
     return parser.parse_args()
@@ -109,8 +109,8 @@ if __name__ == '__main__':
     print("Preparing data ...")
     test_set = encode_types(test_set)
 
-    # divide the features from the battle outcomes
-    X_test = test_set.drop(columns=["outcome"])
+    # extract features and battle outcomes
+    X_test = test_set.drop(columns=["outcome", "game", "battle"])
     y_test = test_set["outcome"]
 
     # load the trained model
@@ -127,4 +127,3 @@ if __name__ == '__main__':
 
     # create a plot with feature importance
     plot_feature_importance(X_test.columns, clf.feature_importances_, os.path.join(args.plots_dir, "feature_importances_plot.jpg"))
-    
