@@ -74,8 +74,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Splits data into training ad test sets and trains a model on data collected from a simulation.")
 
     # arguments
-    parser.add_argument("-i", "--input_data", type=str, required=False, default="./results/collected_data.csv", help="Path to the input dataset with data collected from a simulation.")
-    parser.add_argument("-o", "--model_dir", type=str, required=False, default="./model", help="Path to the directory where to save the trained model.")
+    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("..", "data", "collected_data.csv"), help="Path to the input dataset with data collected from a simulation.")
+    parser.add_argument("-t", "--test_indices_path", type=str, required=False, default=os.path.join("..", "data", "test_indices.npy"), help="Path to the ifile where to save test indices.")
+    parser.add_argument("-m", "--model_path", type=str, required=False, default=os.path.join("..", "model", "model.pickle"), help="Path to the file where to save the trained model.")
     parser.add_argument("-r", "--random_seed", type=int, required=False, default=27, help="Random seed for reproducibility.")
                           
     return parser.parse_args()
@@ -94,23 +95,22 @@ if __name__ == '__main__':
     dataset = pd.read_csv(args.input_data)
 
     # create the folder where to save the model if it does not exist yet
-    os.makedirs(args.model_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(args.model_path), exist_ok=True)
 
     # encode the pokemon types
     print("Preparing data ...")
     dataset = encode_types(dataset)
 
     # divide the features from the battle outcomes
-    X = dataset[[col for col in dataset.columns if col != "outcome"]]
+    X = dataset.drop(columns=["outcome"])
     y = dataset["outcome"]
 
     # split data into a training and a test set and save the indices of test samples
     test_ratio = 0.2
     indices = X.index.to_numpy()
-    print(indices)
     X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(X, y, indices, test_size=test_ratio, random_state=args.random_seed)
-    np.save(os.path.join(args.model_dir, "test_indices.npy"), indices_test)
+    np.save(args.test_indices_path, indices_test)
 
     # select the hyper parameters by performing a randomized search with k-fold cross validation and re-train the model on the whole training set
     print("Performing a randomized hyper parameters search and training a model with the best found hyper parameters ...")
-    hyper_params_search(X_train, y_train, os.path.join(args.model_dir, "model.pickle"))
+    hyper_params_search(X_train, y_train, args.model_path)
