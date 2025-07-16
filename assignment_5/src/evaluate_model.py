@@ -1,5 +1,4 @@
 import os
-import ast
 import argparse
 import pickle
 import random
@@ -8,6 +7,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
+from sklearn.tree import plot_tree
 from scipy.stats.distributions import randint
 from train_model import encode_types
 
@@ -61,11 +61,31 @@ def plot_feature_importance(feature_names, feature_importances, save_path):
     # plot the feature importances
     sns.set_style("whitegrid")
     plt.figure(figsize=(10, 8))
-    sns.barplot(data=pd.DataFrame({"Feature Name": feature_names, "Importance": feature_importances}), x="Importance", y="Feature Name")
+    sns.barplot(data=pd.DataFrame({"Feature Name": feature_names, "Importance": feature_importances}).sort_values(by="Importance", ascending=False), x="Importance", y="Feature Name")
     plt.title("Feature Importances")
     plt.xlabel("Mean Decrease in Impurity (MDI)")
     plt.savefig(save_path, dpi=350)
     plt.close()
+
+def plot_decision_trees(estimators, feature_names, save_dir, n_trees=3):
+    """
+    Plots n_trees decision trees sampled uniformly at random from the input ones.
+
+    Parameters:
+    - estimators: list of DecisionTreeClassifier objects representing a random forest.
+    - feature_names: array with the names of the features.
+    - save_dir: path to the directory where to save the plots.
+    - n_trees: integer representing the number of decision trees to be sampled and plotted.
+    """
+
+    # sample n_trees decision trees
+    sampled_trees = random.sample(estimators, k=n_trees)
+
+    # plot each sampled tree
+    for i, tree in enumerate(sampled_trees):
+        plot_tree(tree, feature_names=feature_names, filled=True, max_depth=2, proportion=True)
+        plt.savefig(os.path.join(save_dir, f"sampled_decision_tree_{i}.jpg"), dpi=350)
+        plt.close()
 
 def parse_args():
     """
@@ -127,3 +147,6 @@ if __name__ == '__main__':
 
     # create a plot with feature importance
     plot_feature_importance(X_test.columns, clf.feature_importances_, os.path.join(args.plots_dir, "feature_importances_plot.jpg"))
+
+    # sample and save the plot of some decision trees
+    plot_decision_trees(clf.estimators_, X_test.columns, args.plots_dir)
