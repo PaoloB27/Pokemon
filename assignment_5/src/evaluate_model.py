@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 from sklearn.tree import plot_tree
 from scipy.stats.distributions import randint
-from train_model import encode_types
+from utils import encode_types
 
 def evaluate_model(y_pred, y_true, save_dir):
     """
