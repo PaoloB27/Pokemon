@@ -2,8 +2,6 @@ import os
 import sys
 import platform
 import time
-import ast
-import pandas as pd
 
 def clear_terminal():
     """
@@ -72,32 +70,3 @@ def choose_option(options, question_sentence="What do you want to do?"):
 
         # the option is valid
         return choice_id
-
-def encode_types(dataset):
-    """
-    Encodes the pokemon types.
-    Each type is one-hot encoded.
-    Both the columns "player_types" and "opponent_types" are substituded by one column for each type in the dataset with value 1 if the considered pokemon has that type and 0 otherwise.
-
-    Parameters:
-    - dataset: pandas dataframe with pokemon data collected from a simulation run.
-               It must have the columns "player_types" and "opponent_types".
-
-    Returns:
-    - pandas dataframe with the pokemon types encoded.
-    """
-
-    # transform the lists stored as strings into actual lists
-    dataset["player_types"] = dataset["player_types"].apply(ast.literal_eval)
-    dataset["opponent_types"] = dataset["opponent_types"].apply(ast.literal_eval)
-
-    # encode players' types
-    player_df = dataset.explode("player_types")
-    player_df = pd.get_dummies(player_df["player_types"], prefix="player").groupby(player_df.index).sum()
-    
-    # encode opponents' types
-    opponent_df = dataset.explode("opponent_types")
-    opponent_df = pd.get_dummies(opponent_df["opponent_types"], prefix="opponent").groupby(opponent_df.index).sum()
-
-    # remove the columns "player_types" and "opponent_types" and add the columns with players' types and opponents' types
-    return pd.concat([dataset, player_df, opponent_df], axis=1).drop(["player_types", "opponent_types"], axis=1)

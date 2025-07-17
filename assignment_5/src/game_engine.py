@@ -421,6 +421,63 @@ class GameEngine():
         type_text(f"The battle ends.\n")
         return True
 
+    def get_features(self, player_pokemon, opponent_pokemon):
+        """
+        """
+
+        # create a datafram with the information about the two pokemons
+        X_pokemon = pd.DataFrame(
+            [{
+                "player_hp": player_pokemon.curr_hp,
+                "player_attack": player_pokemon.active_stats["attack"],
+                "player_defense": player_pokemon.active_stats["defense"],
+                "player_speed": player_pokemon.active_stats["speed"],
+                "player_special": player_pokemon.active_stats["special"],
+                "opponent_hp": opponent_pokemon.curr_hp,
+                "opponent_attack": opponent_pokemon.active_stats["attack"],
+                "opponent_defense": opponent_pokemon.active_stats["defense"],
+                "opponent_speed": opponent_pokemon.active_stats["speed"],
+                "opponent_special": opponent_pokemon.active_stats["special"],
+            }]
+        )
+
+        # find all the pokemon types in the dataset of pokemons
+        types = self.pokemons["types"].explode().unique()
+
+        # add a column to the dataframe for each pokemon and for each type, with value 0 if the type is not in the pokemon's types and 1 otherwise
+        for pokemon_type in types:
+            X_pokemon[f"player_{pokemon_type}"] = 1 if pokemon_type in player_pokemon.types else 0
+            X_pokemon[f"opponent_{pokemon_type}"] = 1 if pokemon_type in opponent_pokemon.types else 0
+
+        # sort the dataframe such that it has the columns in the same order used to train the model
+        
+
+        return X_pokemon
+
+    def recommendation_system(self, opponent_pokemon):
+        """
+        Uses the recommender to predict the probability of winning against the opponent pokemon of each pokemon (with hps > 0) in the trainer's list and suggests to the pokemon trainer which pokemon to choose.
+        If no trainer's pokemon has a winning probability > 0.5, then the system suggests to the pokemon trainer to run away.
+        For sure the trainer's list of pokemon contains at least one pokemon with hps > 0, since thsi function is called at the beginning of a battle.
+        By game construction, indeed, when all the pokemons of the trainer are defeated, the pokemon trainer is sent to the pokemon center.
+
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the opponent pokemon to be faced in the battle by the pokemon trainer.
+
+        Returns:
+        - suggested_pokemon:
+        """
+
+        # iterate through the pokemons in the trainer's list to find the one with largest winning probability
+        suggestion = {"name": "", "prob": 0}
+        for pokemon in self.pokemon_trainer.pokemon_list:
+            if pokemon.curr_hp > 0:
+                X_pokemon = self.get_features(pokemon, opponent_pokemon)
+                predicted_prob = self.recommender.predict_proba(X_pokemon)
+                print(predicted_prob)
+                
+                
+
     def battle(self, opponent_pokemon):
         """
         Runs a battle against an opponent pokemon.
@@ -432,6 +489,9 @@ class GameEngine():
         - boolean indicating whether the battle has been won by the trainer (True) or not (False).
           It returns False also in case the wild pokemon has been captured.
         """
+
+        # recommend the best pokemon to choose for the battle to the user
+        self.recommendation_system(opponent_pokemon)
 
         # options among which the pokemon trainer has to choose during an iteration of the battle
         options = ["Attack", "Change Pokemon", "Use Item", "Run Away"]

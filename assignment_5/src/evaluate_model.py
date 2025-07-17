@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 from sklearn.tree import plot_tree
 from scipy.stats.distributions import randint
-from utils import encode_types
+from train_model import encode_types
 
 def evaluate_model(y_pred, y_true, save_dir):
     """
@@ -132,6 +132,9 @@ if __name__ == '__main__':
     # extract features and battle outcomes
     X_test = test_set.drop(columns=["outcome", "game", "battle"])
     y_test = test_set["outcome"]
+
+    # sort the features in the same order considered during training
+    X_test = X_test.sort_index(axis=1)
 
     # load the trained model
     with open(args.model_path, "rb") as file:
