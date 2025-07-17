@@ -170,22 +170,3 @@ class PokemonTrainer:
         # if the added pokemon is the only one in the list, then set it as the active pokemon
         if len(self.pokemon_list) == 1:
             self.active_pokemon = self.pokemon_list[0]
-    
-    def change_active_pokemon(self, new_active_pokemon_name):
-        """
-        Changes the active pokemon by setting as new active pokemon the one in the trainer's list with name new_active_pokemon_name.
-
-        Parameters:
-        - new_active_pokemon_name: name of the pokemon in the trainer's list to set as active pokemon.
-        """
-
-        # find the pokemon in the trainer's list with the input name and set it as the active pokemon
-        for pokemon in self.pokemon_list:
-            if pokemon.name == new_active_pokemon_name:
-                previous_name = self.active_pokemon.name
-                self.active_pokemon = pokemon
-                type_text(f"{self.name} calls {self.active_pokemon.name} to substitute {previous_name}.\n")
-                return
-        
-        # there is no pokemon in the trainer's list with the input name, so raise a ValueError
-        raise ValueError(f"{new_active_pokemon_name} is not in your list of Pokemon")

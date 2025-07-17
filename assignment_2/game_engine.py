@@ -181,13 +181,13 @@ def change_pokemon(pokemon_trainer):
     """
 
     # pokemon that can be selected for the change
-    available_pokemon = [pokemon.name for pokemon in pokemon_trainer.pokemon_list if pokemon is not pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
+    available_pokemon = [pokemon for pokemon in pokemon_trainer.pokemon_list if pokemon is not pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
     available_pokemon_to_display = [f"{pokemon.name} | {pokemon.curr_hp} HP" for pokemon in pokemon_trainer.pokemon_list if pokemon is not pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
     
     # there is at least a pokemon that can be used
     if available_pokemon:
         chosen_pokemon = available_pokemon[choose_option(available_pokemon_to_display, "What pokemon do you want to become active?")]
-        pokemon_trainer.change_active_pokemon(chosen_pokemon)
+        pokemon_trainer.active_pokemon = chosen_pokemon
         return True
     
     # there is no pokemon that can be used
