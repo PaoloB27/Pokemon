@@ -1,146 +1,10 @@
 import os
-import json
 from copy import deepcopy
 import random
 import argparse
 import pandas as pd
 from tqdm import tqdm
-from pokemon_character import PokemonCharacter
-
-def to_pokemon_character(row_df):
-    """
-    Converts the row of a dataframe with pokemon information into a PokemonCharacter object.
-
-    Parameters:
-    - row_df: row of a pandas dataframe with all information about a pokemon.
-
-    Returns:
-    - pokemon: PokemonCharacter with all information in the input row about a pokemon.
-    """
-
-    # instantiate a PokemonCharacter object with the input information
-    pokemon = PokemonCharacter(
-        name=row_df["name"],
-        base_stats=row_df["baseStats"],
-        moves=row_df["moves"],
-        national_pokedex_number=row_df["national_pokedex_number"],
-        types=row_df["types"],
-        level=row_df["level"]
-    )
-
-    # return the PokemonCharacter object
-    return pokemon
-
-def load_moves(path):
-    """
-    Loads a dataset of moves from a .json file.
-    It removes the moves with "power" equal to null and the keys "effect", "effects", "changes".
-
-    Parameters:
-    - path: path to the .json file with the moves to be loaded.
-
-    Returns:
-    - moves: pandas dataframe with each entry that is a different move.
-    """
-
-    # keys to be removes
-    keys_to_remove = ["effect", "effects", "changes"]
-
-    # initialize the list of dictionaries that will contain the loaded moves
-    moves = []
-
-    # open the .json file
-    with open(path, "r") as file:
-        
-        # iterate through lines
-        for line in file:
-
-            # convert the string into a dictionary
-            move = json.loads(line)
-
-            # add the move only if the value of "power" and "accuracy" are not None
-            if move["power"] is not None and move["accuracy"] is not None:
-                
-                # remove the entries with key in keys_to_remove
-                move = {key: value for key, value in move.items() if key not in keys_to_remove}
-
-                # add the dictionary repesenting a move to the list
-                moves.append(move)
-
-    # return the loaded moves in a pandas dataframe
-    return pd.DataFrame(moves)
-
-def load_pokemons(path, moves):
-    """
-    Loads a dataset of pokemons from a .json file.
-    It adds the entry with key "level" and value 1 to each dictionary representing a pokemon.
-    It also adds two moves to each pokemon by sampling them at random from the input moves such that type coherence is respected.
-
-    Parameters:
-    - path: path to the .json file with the pokemons to be loaded.
-    - moves: pandas dataframe with all possible pokemon moves.
-
-    Returns:
-    - pokemons: dataframe with each entry that represents a different pokemon.
-    """
-
-    # initialize the list that will contain the loaded pokemons
-    pokemons = []
-
-    # open the .json file
-    with open(path, "r") as file:
-        
-        # iterate through lines
-        for line in file:
-
-            # convert the line into a dictionary representing a pokemon
-            curr_pokemon = json.loads(line)
-
-            # add the entry ("level", 1)
-            curr_pokemon["level"] = 1
-
-            # add to the loaded pokemon 4 moves sampled uniformly at random such that the pokemon has at least one move of each type of the pokemon itself
-            n_moves = 4
-            curr_pokemon["moves"] = []
-            for pokemon_type in curr_pokemon["types"]:
-                if pokemon_type in moves["type"].explode().unique():                                                                                                   # there are no moves of some pokemon types in the dataset
-                    curr_pokemon["moves"].extend(moves[moves["type"] == pokemon_type].sample(random_state=random.randint(0, 10000)).to_dict(orient="records"))
-            curr_pokemon["moves"].extend(moves[(moves["type"] == "normal") | (moves["type"].isin(curr_pokemon["types"]))].sample(n=n_moves - len(curr_pokemon["moves"]), random_state=random.randint(0, 10000)).to_dict(orient="records"))
-
-            # append the current pokemon to the list of pokemons
-            pokemons.append(curr_pokemon)
-
-    # return the loaded pokemons as a pandas dataframe
-    return pd.DataFrame(pokemons)
-
-def load_type_effectiveness(path):
-    """
-    Loads type effectiveness relations from a .json file.
-
-    Parameters:
-    - path: path to the .json file with the data to be loaded.
-
-    Returns:
-    - data: pandas dataframe with the input data. Each row is a different (attack_type, defend_type) pair.
-    """
-
-    # initialize the list that will contain the loaded data
-    data = []
-
-    # open the .json file
-    with open(path, "r") as file:
-        
-        # iterate through lines
-        for line in file:
-
-            # convert the line into a dictionary
-            pair = json.loads(line)
-
-            # append the pair to the list
-            data.append(pair)
-
-    # return the loaded type effectivenesses after having converted them into a pandas dataframe
-    return pd.DataFrame(data)
+from game_engine import GameEngine
 
 def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
     """
@@ -162,7 +26,7 @@ def random_battle(input_pokemon, wild_pokemons, type_effectiveness):
     # sample uniformly at random a wild pokemon and a level in [1, 20], making a copy so to keep modifications only in the current battle
     sampled_pokemon = deepcopy(wild_pokemons.sample(random_state=random.randint(0, 10000)).iloc[0])
     sampled_pokemon["level"] = random.randint(1, 20)
-    sampled_pokemon = to_pokemon_character(sampled_pokemon)
+    sampled_pokemon = GameEngine.to_pokemon_character(sampled_pokemon)
 
     # start the battle and end it when one of the two pokemons has been defeated
     while True:
@@ -214,7 +78,7 @@ def run_simulation(n_games, n_battles, pokemons, type_effectiveness):
             # sample uniformly at random a starter pokemon and set its level to a random value in [1, 20]
             starter = pokemons.sample(random_state=random.randint(0, 10000)).iloc[0]
             starter["level"] = random.randint(1, 20)
-            starter = to_pokemon_character(starter)
+            starter = GameEngine.to_pokemon_character(starter)
 
             # run the battle and collect data
             wild_act_stats, wild_types, battle_outcome = random_battle(starter, pokemons, type_effectiveness)
@@ -266,9 +130,9 @@ if __name__ == '__main__':
     random.seed(args.random_seed)
 
     # load pokemons, moves and type effectiveness data from .json files
-    moves = load_moves(args.input_moves)
-    pokemons = load_pokemons(args.input_pokemons, moves)
-    type_effectiveness = load_type_effectiveness(args.input_type_effectiveness)
+    moves = GameEngine.load_moves(args.input_moves)
+    pokemons = GameEngine.load_pokemons(args.input_pokemons, moves)
+    type_effectiveness = GameEngine.load_type_effectiveness(args.input_type_effectiveness)
 
     # run the simulation
     collected_data = run_simulation(args.n_games, args.n_battles, pokemons, type_effectiveness)

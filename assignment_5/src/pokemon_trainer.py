@@ -90,8 +90,8 @@ class PokemonTrainer:
             type_text(f"\n{self.name} gives a potion to {self.active_pokemon.name}!\n")
             type_text(f"Previous HP of {self.active_pokemon.name}: {self.active_pokemon.curr_hp}\n")
             self.active_pokemon.curr_hp += 20
-            if self.active_pokemon.curr_hp > self.active_pokemon.base_stats["hp"]:
-                self.active_pokemon.curr_hp = self.active_pokemon.base_stats["hp"]
+            if self.active_pokemon.curr_hp > self.active_pokemon.active_stats["hp"]:
+                self.active_pokemon.curr_hp = self.active_pokemon.active_stats["hp"]
             type_text(f"Current HP of {self.active_pokemon.name}: {self.active_pokemon.curr_hp}\n")
             self.decrease_item("potion")
 
@@ -120,14 +120,14 @@ class PokemonTrainer:
             type_text(f"{self.name} uses a Pokeball!\n")
 
             # probability of catching the opponent pokemon
-            catch_probability = 1 - opponent_pokemon.curr_hp / opponent_pokemon.base_stats["hp"]
+            catch_probability = 1 - opponent_pokemon.curr_hp / opponent_pokemon.active_stats["hp"]
 
             # the pokemon is catched
             if random.random() < catch_probability:
                 for i in range(1, 4):
                     type_text(f"{i}... ")
                     time.sleep(0.5)
-                type_text(f"Yes! Congratulations! {self.name} catched a {opponent_pokemon.name}!\nThe catched {opponent_pokemon.name} has been added to yuour list of pokemon.\n")
+                type_text(f"Yes! Congratulations! {self.name} catched the wild {opponent_pokemon.name}!\nThe catched {opponent_pokemon.name} has been added to yuour list of pokemon.\n")
                 
                 # there is no more space for a new pokemon
                 if len(self.pokemon_list) >= self.max_n_pokemon:

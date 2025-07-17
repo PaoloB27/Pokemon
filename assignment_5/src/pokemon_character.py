@@ -83,6 +83,26 @@ class PokemonCharacter:
         
         return act_stats
 
+    def set_level(self, level):
+        """
+        Assigns the pokemon the input level, updating its active statistics.
+
+        Parameters:
+        - level: integer representing the level to be assigned to the pokemon.
+        """
+
+        # ratio of hps that the pokemon had before changing level
+        perc_hp = self.curr_hp / self.active_stats["hp"]
+
+        # update the pokemon's level
+        self.level = level
+
+        # update the pokemon's active stats
+        self.active_stats = self.__compute_active_stats()
+
+        # update the pokemon's current hps maintaining the same proportion of before changing level
+        self.curr_hp = math.ceil(self.active_stats["hp"] * perc_hp)
+
     def use_move(self, move_name, opponent_pokemon, type_effectiveness, verbose=True):
         """
         Use the input move to attack the opponent pokemon.
@@ -103,10 +123,10 @@ class PokemonCharacter:
 
         # print some information about the move
         if verbose:
-            type_text(f"{self.name} uses {move_name}!\n")
+            type_text(f"{self.name.capitalize()} uses {move_name}!\n")
 
-        # # reduce the power points (pp) of the move, independently of whether the move succeeds or not
-        # self.curr_pps[move_name] -= 1
+        # reduce the power points (pp) of the move, independently of whether the move succeeds or not
+        self.curr_pps[move_name] -= 1
 
         # the move succeeds with a probability equal to its accuracy
         if random.random() < move["accuracy"]:
@@ -123,7 +143,7 @@ class PokemonCharacter:
             modifier = stability * effect * critical * luck
             attack = self.active_stats["attack"] if move["category"] == "physical" else self.active_stats["special"]
             defense = opponent_pokemon.active_stats["defense"] if move["category"] == "physical" else opponent_pokemon.active_stats["special"]
-            damage = math.floor(((2 * self.level + 10) / 250 * (attack / defense) * move["power"] + 2) * modifier)
+            damage = math.floor((((2 * self.level + 10) / 250) * (attack / defense) * move["power"] + 2) * modifier)
 
             # apply the damage to the opponent pokemon
             opponent_pokemon.curr_hp -= damage
@@ -132,7 +152,7 @@ class PokemonCharacter:
             if verbose:
                 type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
         
-            # if the move fails, just print information
-            else:
-                if verbose:
-                    type_text(f"{self.name}'s {move_name} missed!\n")
+        # if the move fails, just print information
+        else:
+            if verbose:
+                type_text(f"{self.name}'s {move_name} missed!\n")

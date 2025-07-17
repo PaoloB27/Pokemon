@@ -1,455 +1,641 @@
+import os
+import json
+import pickle
 import random
+import pandas as pd
 from pokemon_trainer import PokemonTrainer
 from pokemon_character import PokemonCharacter
-from pokemon_moves import moves
-from pokemon import starter_pokemon, wild_pokemon
 from utils import clear_terminal, type_text, choose_option
 
-def pokemon_from_dict(pokemon_info):
-    """
-    Initializes a PokemonCharacter object from an input dictionary.
-
-    Parameters:
-    - pokemon_info: dictionary that must have the following entries:
-                    - name: string with the name of the pokemon;
-                    - base_stast: dictionary with the basic statistics of the pokemon;
-                    - moves: list of strings with the names of the moves of the pokemon;
-                    - national_pokedex_number: integer resperenting the national pokedex number of the pokemon;
-                    - types: list of strings with the types of the pokemon.
+class GameEngine():
     
-    Returns:
-    - pokemon: PokemonCharacter initialized with the input information.
-    """
+    # set the maximum level that can be achieved by a pokemon in the game
+    max_level_game = 25
 
-    # initialize a PokemonCharacter with the input information
-    moves_dict = {move["name"]: move for move in moves}
-    pokemon = PokemonCharacter(
-        name=pokemon_info["name"],
-        national_pokedex_number=pokemon_info["national_pokedex_number"],
-        types=pokemon_info["types"],
-        base_stats=pokemon_info["base_stats"],
-        moves=[moves_dict[m] for m in pokemon_info["moves"]]
-    )
+    # folder where to load and save game data
+    savings_folder = os.path.join("..", "saved_games")
 
-    return pokemon
+    def __init__(self, pokemons_path, moves_path, type_effectiveness_path, recommender_path, starter_names=["bulbasaur", "charmander", "squirtle"]):
+        """
+        A GameEngine object has everything needed for playing the game.
+        It asks the user whether to load previously saved data, if any.
 
-def initialize_pokemon_trainer():
-    """
-    Initializes a PokemonTrainer with:
-    - a name chosen by the user;
-    - a starter pokemon chosen by the user among Charmander, Squirtle and Bulbasaur;
-    - 10 potions and 10 pokeballs as items.
+        Parameters:
+        - pokemons_path: path to the dataset with all the pokemons available in the game.
+        - moves_path: path to the dataset with all the moves available in the game.
+        - type_effectiveness_path: path to the dataset with effectiveness for all possible pairs of types.
+        - recommender_path: path to the trained predictor that is capable of predicting the outcome of a battle given the types and the active statistics of the pokemons involved.
+        - starter_names: list of strings with the names of the starter pokemons.
+        """
 
-    Returns:
-    - trainer: PokemonTrainer object representing the initialized pokemon trainer.
-    """
+        # load moves, pokemons and type effectiveness data into pandas dataframes
+        type_text("\nStarting the game...\n")
+        self.moves = self.load_moves(moves_path)
+        self.pokemons = self.load_pokemons(pokemons_path, self.moves)
+        self.type_effectiveness = self.load_type_effectiveness(type_effectiveness_path)
 
-    # ask the user (i.e., the pokemon trainer) to enter his name
-    type_text("\nHello pokemon trainer! What is your name?\n")
-    trainer_name = input("> ")
-    clear_terminal()
-    
-    # create the pokemon trainer
-    trainer = PokemonTrainer(trainer_name)
+        # load the recommender
+        with open(recommender_path, "rb") as file:
+            self.recommender = pickle.load(file)
 
-    # make the user choose the starter pokemon
-    starter_pokemon_choice = choose_option([pokemon["name"] for pokemon in starter_pokemon], f"Ok {trainer_name}, I want you to choose one of the following pokemon:")
-    clear_terminal()
+        # initialize the pokemon trainer
+        clear_terminal()
+        self.pokemon_trainer = self.initialize_pokemon_trainer(starter_names)
 
-    # create the starter pokemon and add it to the pokemon trainer's list
-    chosen_pokemon = starter_pokemon[int(starter_pokemon_choice)]
-    chosen_pokemon = pokemon_from_dict(chosen_pokemon)
-    type_text(f"You chose {chosen_pokemon.name}! Great choice {trainer_name}!\n\n")
-    trainer.add_pokemon(chosen_pokemon)
+    @staticmethod
+    def to_pokemon_character(row_df):
+        """
+        Converts the row of a dataframe with pokemon information into a PokemonCharacter object.
 
-    # add 10 potions and 10 pokeballs to the pokemon trainer's items
-    trainer.add_items("potion", 10)
-    trainer.add_items("pokeball", 10)
+        Parameters:
+        - row_df: row of a pandas dataframe with all information about a pokemon.
 
-    return trainer
+        Returns:
+        - pokemon: PokemonCharacter with all information in the input row about a pokemon.
+        """
 
-def attack(pokemon_trainer, opponent_pokemon):
-    """
-    The active pokemon of the pokemon trainer attacks the opponent pokemon.
+        # instantiate a PokemonCharacter object with the input information
+        pokemon = PokemonCharacter(
+            name=row_df["name"],
+            base_stats=row_df["baseStats"],
+            moves=row_df["moves"],
+            national_pokedex_number=row_df["national_pokedex_number"],
+            types=row_df["types"],
+            level=row_df["level"]
+        )
 
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-    - opponent_pokemon: PokemonCharacter object representing the pokemon that receives the attack.
+        # return the PokemonCharacter object
+        return pokemon
 
-    Returns:
-    - is_defeated: boolean indicating whether the opponent pokemon is defeated or not.
-    """
+    @staticmethod
+    def load_moves(path):
+        """
+        Loads a dataset of moves from a .json file.
+        It removes the moves with "power" equal to null and the keys "effect", "effects", "changes".
 
-    # if the active pokemon does not have any move with pps > 0, then return
-    if not [pp for pp in pokemon_trainer.active_pokemon.curr_pps.values() if pp > 0]:
-        type_text(f"\nOh no! {pokemon_trainer.active_pokemon.name} finished all the PPs!\n")
-        return False
+        Parameters:
+        - path: path to the .json file with the moves to be loaded.
 
-    # make the pokemon trainer choose a move that still has some pps
-    possible_moves = [move_name for move_name, pp in pokemon_trainer.active_pokemon.curr_pps.items() if pp > 0]
-    options = [f"{move_name} | {pp} PP" for move_name, pp in pokemon_trainer.active_pokemon.curr_pps.items() if pp > 0]
-    chosen_move = possible_moves[choose_option(options, question_sentence=f"Which move do you want {pokemon_trainer.active_pokemon.name} to use?")]
+        Returns:
+        - moves: pandas dataframe with each entry that is a different move.
+        """
 
-    # make the active pokemon attack the opponent pokemon with the chosen move
-    pokemon_trainer.active_pokemon.use_move(chosen_move, opponent_pokemon)
+        # keys to be removes
+        keys_to_remove = ["effect", "effects", "changes"]
 
-    # check whether the opponent pokemon is defeated and end the battle in this case
-    if opponent_pokemon.curr_hp <= 0:
-        type_text(f"\nCongratulations! The wild {opponent_pokemon.name} is defeated!\n")
-        return True
-    
-    # the opponent pokemon is not difeated
-    return False
+        # initialize the list of dictionaries that will contain the loaded moves
+        moves = []
 
-def use_item(pokemon_trainer, opponent_pokemon):
-    """
-    Makes the pokemon trainer choose an item among the available ones and applies it.
-
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-    - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
-
-    Returns:
-    - is_catched: boolean indicating whether the opponent pokemon is catched or not, in case the item to use is a pokeball.
-                  If the item to use is not a pokeball, then it returns False.
-    """
-
-    # make the trainer choose which item has to be used
-    items = [item_name for item_name in pokemon_trainer.items.keys()]
-    options = [f"{item_name} | {quantity}" for item_name, quantity in pokemon_trainer.items.items()]
-    chosen_item = items[choose_option(options, "What item do you want to use?")]
-
-    # apply a potion to the pokemon trainer's active pokemon
-    if chosen_item == "potion":
-        pokemon_trainer.use_potion()
-        return False
-    
-    # use a pokeball to try to catch the opponent pokemon
-    elif chosen_item == "pokeball":
-        
-        # there is space for a new pokemon in the trainer's list
-        try:
+        # open the .json file
+        with open(path, "r") as file:
             
-            # the pokemon has been catched
-            if pokemon_trainer.use_pokeball(opponent_pokemon):
+            # iterate through lines
+            for line in file:
+
+                # convert the string into a dictionary
+                move = json.loads(line)
+
+                # add the move only if the value of "power" and "accuracy" are not None
+                if move["power"] is not None and move["accuracy"] is not None:
+                    
+                    # remove the entries with key in keys_to_remove
+                    move = {key: value for key, value in move.items() if key not in keys_to_remove}
+
+                    # add the dictionary repesenting a move to the list
+                    moves.append(move)
+
+        # return the loaded moves in a pandas dataframe
+        return pd.DataFrame(moves)
+
+    @staticmethod
+    def load_pokemons(path, moves):
+        """
+        Loads a dataset of pokemons from a .json file.
+        It adds the entry with key "level" and value 1 to each dictionary representing a pokemon.
+        It also adds two moves to each pokemon by sampling them at random from the input moves such that type coherence is respected.
+
+        Parameters:
+        - path: path to the .json file with the pokemons to be loaded.
+        - moves: pandas dataframe with all possible pokemon moves.
+
+        Returns:
+        - pokemons: dataframe with each entry that represents a different pokemon.
+        """
+
+        # initialize the list that will contain the loaded pokemons
+        pokemons = []
+
+        # open the .json file
+        with open(path, "r") as file:
+            
+            # iterate through lines
+            for line in file:
+
+                # convert the line into a dictionary representing a pokemon
+                curr_pokemon = json.loads(line)
+
+                # add the entry ("level", 1)
+                curr_pokemon["level"] = 1
+
+                # add to the loaded pokemon 4 moves sampled uniformly at random such that the pokemon has at least one move of each type of the pokemon itself
+                n_moves = 4
+                curr_pokemon["moves"] = []
+                for pokemon_type in curr_pokemon["types"]:
+                    if pokemon_type in moves["type"].explode().unique():                                                                                                   # there are no moves of some pokemon types in the dataset
+                        curr_pokemon["moves"].extend(moves[moves["type"] == pokemon_type].sample(random_state=random.randint(0, 10000)).to_dict(orient="records"))
+                curr_pokemon["moves"].extend(moves[(moves["type"] == "normal") | (moves["type"].isin(curr_pokemon["types"]))].sample(n=n_moves - len(curr_pokemon["moves"]), random_state=random.randint(0, 10000)).to_dict(orient="records"))
+
+                # append the current pokemon to the list of pokemons
+                pokemons.append(curr_pokemon)
+
+        # return the loaded pokemons as a pandas dataframe
+        return pd.DataFrame(pokemons)
+
+    @staticmethod
+    def load_type_effectiveness(path):
+        """
+        Loads type effectiveness relations from a .json file.
+
+        Parameters:
+        - path: path to the .json file with the data to be loaded.
+
+        Returns:
+        - data: pandas dataframe with the input data. Each row is a different (attack_type, defend_type) pair.
+        """
+
+        # initialize the list that will contain the loaded data
+        data = []
+
+        # open the .json file
+        with open(path, "r") as file:
+            
+            # iterate through lines
+            for line in file:
+
+                # convert the line into a dictionary
+                pair = json.loads(line)
+
+                # append the pair to the list
+                data.append(pair)
+
+        # return the loaded type effectivenesses after having converted them into a pandas dataframe
+        return pd.DataFrame(data)
+
+    def initialize_pokemon_trainer(self, starter_names):
+        """
+        Initializes a PokemonTrainer loading existing data or creating a new instance.
+
+        Parameters:
+        - starter_names: list of strings with the names of the starter pokemons.
+
+        Returns:
+        - trainer: PokemonTrainer object representing the initialized pokemon trainer.
+        """
+
+        # find all saved games, if any
+        saved_games = ["Start a new game"]
+        if os.path.isdir(self.savings_folder):
+            saved_games.extend(os.listdir(self.savings_folder))
+
+        # ask the user to choose whether to create a new character or load an existing one
+        choice = choose_option([saved_games[0]] + [f"Load {saved_games[i][:-len(".pickle")]} data" for i in range(1, len(saved_games))], "Welcome to the game! What do you want to do?")
+        clear_terminal()
+
+        # load the file chosen by the user and return the corresponding PokemonTrainer object
+        if choice > 0:
+            with open(os.path.join(self.savings_folder, saved_games[choice]), "rb") as file:
+                trainer = pickle.load(file)
+            type_text(f"\nHello {trainer.name}! Welcome back to the Pokemon World!\n")
+            return trainer
+        
+        # ask the user (i.e., the pokemon trainer) to enter his name
+        type_text("\nLet's start a new game then! What is your name?\n")
+        trainer_name = input("> ")
+        clear_terminal()
+        
+        # create the pokemon trainer
+        trainer = PokemonTrainer(trainer_name)
+
+        # make the user choose the starter pokemon
+        starter_pokemon_choice = choose_option([name.capitalize() for name in starter_names], f"Ok {trainer_name}, I want you to choose one of the following pokemons:")
+        clear_terminal()
+
+        # create the starter pokemon with a random level between 5 and 15 and add it to the pokemon trainer's list
+        chosen_pokemon_name = starter_names[int(starter_pokemon_choice)]
+        chosen_pokemon = self.pokemons[self.pokemons["name"] == chosen_pokemon_name].iloc[0]
+        chosen_pokemon["level"] = random.randint(5, 15)
+        chosen_pokemon = self.to_pokemon_character(chosen_pokemon)
+        type_text(f"You chose {chosen_pokemon.name.capitalize()}! Great choice {trainer_name}!\n\n")
+        trainer.add_pokemon(chosen_pokemon)
+
+        # add 10 potions and 10 pokeballs to the pokemon trainer's items
+        trainer.add_items("potion", 10)
+        trainer.add_items("pokeball", 10)
+
+        return trainer
+
+    def attack(self, opponent_pokemon):
+        """
+        The active pokemon of the pokemon trainer attacks the opponent pokemon.
+
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the pokemon that receives the attack.
+
+        Returns:
+        - is_defeated: boolean indicating whether the opponent pokemon is defeated or not.
+        """
+
+        # if the active pokemon does not have any move with pps > 0, then return
+        if not [pp for pp in self.pokemon_trainer.active_pokemon.curr_pps.values() if pp > 0]:
+            type_text(f"\nOh no! {self.pokemon_trainer.active_pokemon.name.capitalize()} finished all the PPs!\n")
+            return False
+
+        # make the pokemon trainer choose a move that still has some pps
+        possible_moves = [move_name for move_name, pp in self.pokemon_trainer.active_pokemon.curr_pps.items() if pp > 0]
+        options = [f"{move_name} | {int(pp)} PP" for move_name, pp in self.pokemon_trainer.active_pokemon.curr_pps.items() if pp > 0]
+        chosen_move = possible_moves[choose_option(options, question_sentence=f"Which move do you want {self.pokemon_trainer.active_pokemon.name.capitalize()} to use?")]
+
+        # make the active pokemon attack the opponent pokemon with the chosen move
+        self.pokemon_trainer.active_pokemon.use_move(chosen_move, opponent_pokemon, self.type_effectiveness)
+
+        # check whether the opponent pokemon is defeated and end the battle in this case
+        if opponent_pokemon.curr_hp <= 0:
+            type_text(f"\nCongratulations! The wild {opponent_pokemon.name.capitalize()} is defeated!\n")
+            return True
+        
+        # the opponent pokemon is not difeated
+        return False
+
+    def use_item(self, opponent_pokemon):
+        """
+        Makes the pokemon trainer choose an item among the available ones and applies it.
+
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
+
+        Returns:
+        - is_catched: boolean indicating whether the opponent pokemon is catched or not, in case the item to use is a pokeball.
+                    If the item to use is not a pokeball, then it returns False.
+        """
+
+        # make the trainer choose which item has to be used
+        items = [item_name for item_name in self.pokemon_trainer.items.keys()]
+        options = [f"{item_name} | {quantity}" for item_name, quantity in self.pokemon_trainer.items.items()]
+        chosen_item = items[choose_option(options, "What item do you want to use?")]
+
+        # apply a potion to the pokemon trainer's active pokemon
+        if chosen_item == "potion":
+            self.pokemon_trainer.use_potion()
+            return False
+        
+        # use a pokeball to try to catch the opponent pokemon
+        elif chosen_item == "pokeball":
+            
+            # there is space for a new pokemon in the trainer's list
+            try:
+                
+                # the pokemon has been catched
+                if self.pokemon_trainer.use_pokeball(opponent_pokemon):
+                    return True
+                
+                # the pokemon has not been catched
+                return False
+            
+            # there is not space for a new pokemon in the trainer's list, but the pokemon has been catched and freed, so the battle ends
+            except OverflowError:
+                type_text(f"The catched {opponent_pokemon.name.capitalize()} is left free and the used pokeball is thrown away.\n")
                 return True
-            
-            # the pokemon has not been catched
-            return False
-        
-        # there is not space for a new pokemon in the trainer's list, but the pokemon has been catched and freed, so the battle ends
-        except OverflowError:
-            type_text(f"The catched {opponent_pokemon.name} is left free and the used pokeball is thrown away.\n")
+
+    def run_away(self, opponent_pokemon):
+        """
+        Makes the pokemon trainer try to run away from the encountered wild pokemon.
+
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
+
+        Returns:
+        - is_escaped: boolean indicating whether the pokemon trainer has run away or not.
+        """
+
+        # print some information
+        type_text(f"{self.pokemon_trainer.name.capitalize()} wants to run away.\n")
+
+        # probability of running away
+        run_prob = 0.6
+
+        # the pokemon trainer successfully runs away, so the battle is over
+        if random.random() < run_prob:
+            type_text(f"{self.pokemon_trainer.name.capitalize()} runs away, the battle is over.\n")
             return True
-
-def run_away(pokemon_trainer, opponent_pokemon):
-    """
-    Makes the pokemon trainer try to run away from the encountered wild pokemon.
-
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-    - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
-
-    Returns:
-    - is_escaped: boolean indicating whether the pokemon trainer has run away or not.
-    """
-
-    # print some information
-    type_text(f"{pokemon_trainer.name} wants to run away.\n")
-
-    # probability of running away
-    run_prob = 0.6
-
-    # the pokemon trainer successfully runs away, so the battle is over
-    if random.random() < run_prob:
-        type_text(f"{pokemon_trainer.name} ran away, the battle is over.\n")
-        return True
-    
-    # the pokemon trainer fails to run away, so the battle goes on
-    type_text(f"{opponent_pokemon.name} prevents {pokemon_trainer.name} to run away, the battle continues!\n")
-    return False
-
-def change_pokemon(pokemon_trainer):
-    """
-    Changes the active pokemon during a battle.
-
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-
-    Returns:
-    - True if the change has been successful, False if the change cannot be made.
-    """
-
-    # pokemon that can be selected for the change
-    available_pokemon = [pokemon.name for pokemon in pokemon_trainer.pokemon_list if pokemon is not pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
-    available_pokemon_to_display = [f"{pokemon.name} | {pokemon.curr_hp} HP" for pokemon in pokemon_trainer.pokemon_list if pokemon is not pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
-    
-    # there is at least a pokemon that can be used
-    if available_pokemon:
-        chosen_pokemon = available_pokemon[choose_option(available_pokemon_to_display, "What pokemon do you want to become active?")]
-        pokemon_trainer.change_active_pokemon(chosen_pokemon)
-        return True
-    
-    # there is no pokemon that can be used
-    type_text(f"You cannot change {pokemon_trainer.active_pokemon.name}!\n")
-    return False
-
-def opponent_pokemon_turn(pokemon_trainer, opponent_pokemon):
-    """
-    Makes the opponent pokemon attack the active pokemon of the trainer.
-    If the trainer's active pokemon is defeated, then a new active pokemon is chosen in the trainer's list, if any.
-    If there is no pokemon in the trainer's list that is not K.O., then True is returned.
-
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-    - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
-
-    Returns:
-    - is_defeated: boolean indicating whether all pokemon of the pokemon trainer have been defeated or not.
-    """
-
-    # print some information    
-    type_text(f"\nIt's the turn of {opponent_pokemon.name} now!\n\n")
-
-    # if the wild pokemon does not have any move with pp > 0, then return
-    if not [pp for pp in opponent_pokemon.curr_pps.values() if pp > 0]:
-        type_text(f"\nOh no! {opponent_pokemon.name} finished all the PPs!\n")
+        
+        # the pokemon trainer fails to run away, so the battle goes on
+        type_text(f"{opponent_pokemon.name.capitalize()} prevents {self.pokemon_trainer.name.capitalize()} to run away, the battle continues!\n")
         return False
 
-    # make the opponent pokemon attack the trainer's active pokemon with a move sampled uniformly at random among the available ones
-    opponent_pokemon.use_move(random.choice([move_name for move_name, pp in opponent_pokemon.curr_pps.items() if pp > 0]), pokemon_trainer.active_pokemon)
-    
-    # check whether the trainer's active pokemon is defeated
-    if pokemon_trainer.active_pokemon.curr_hp <= 0:
-        
-        # print some information
-        type_text(f"\n{pokemon_trainer.active_pokemon.name} is defeated!\n")
+    def change_pokemon(self):
+        """
+        Changes the active pokemon during a battle.
 
-        # if all trainer's pokemon are defeated, then the battle ends and the pokemon trainer has to go to the pokemon center
-        if not change_pokemon(pokemon_trainer):
-            type_text(f"\nAll {pokemon_trainer.name}'s pokemon are K.O., so {pokemon_trainer.name} loses the battle!\n")
+        Returns:
+        - True if the change has been successful, False if the change cannot be made.
+        """
+
+        # pokemon that can be selected for the change
+        available_pokemon = [pokemon.name for pokemon in self.pokemon_trainer.pokemon_list if pokemon is not self.pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
+        available_pokemon_to_display = [f"{pokemon.name} | {pokemon.curr_hp} HP" for pokemon in self.pokemon_trainer.pokemon_list if pokemon is not self.pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
+        
+        # there is at least a pokemon that can be used
+        if available_pokemon:
+            chosen_pokemon = available_pokemon[choose_option(available_pokemon_to_display, "What pokemon do you want to become active?")]
+            self.pokemon_trainer.change_active_pokemon(chosen_pokemon)
             return True
-    
-    # the battle is not ended
-    return False
+        
+        # there is no pokemon that can be used
+        type_text(f"You cannot change {self.pokemon_trainer.active_pokemon.name.capitalize()}!\n")
+        return False
 
-def check_pps(pokemon_trainer, opponent_pokemon):
-    """
-    Checks whether all trainer's pokemons and the opponent pokemon do not have any move with pp > 0.
+    def opponent_pokemon_turn(self, opponent_pokemon):
+        """
+        Makes the opponent pokemon attack the active pokemon of the trainer.
+        If the trainer's active pokemon is defeated, then a new active pokemon is chosen in the trainer's list, if any.
+        If there is no pokemon in the trainer's list that is not K.O., then True is returned.
 
-    Parameters:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-    - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
 
-    Returns:
-    - no_pps: boolean indicating whether all trainer's pokemons and the opponent pokemon do not have any move with pp > 0.
-    """
+        Returns:
+        - is_defeated: boolean indicating whether all pokemon of the pokemon trainer have been defeated or not.
+        """
 
-    # check whether the opponent pokemon has at least a move with pp > 0
-    for pp in opponent_pokemon.curr_pps.values():
-        if pp > 0:
+        # print some information    
+        type_text(f"\nIt's the turn of {opponent_pokemon.name.capitalize()} now!\n\n")
+
+        # if the wild pokemon does not have any move with pp > 0, then return
+        if not [pp for pp in opponent_pokemon.curr_pps.values() if pp > 0]:
+            type_text(f"\nOh no! {opponent_pokemon.name.capitalize()} finished all the PPs!\n")
             return False
-    
-    # check whether there is at least one trainer's pokemon that can fight with at least one move with pp > 0
-    for pokemon in pokemon_trainer.pokemon_list:
-        if pokemon.curr_hp > 0:
-            for pp in opponent_pokemon.curr_pps.values():
-                if pp > 0:
-                    return False
-            
-    # no pokemon has at least one move with pp > 0
-    type_text(f"\n{pokemon_trainer.name} has no pokemon with pp > 0 that can fight!\n")
-    type_text(f"Even {opponent_pokemon.name} has no move with pp > 0!\n")
-    type_text(f"The battle ends.\n")
-    return True
-
-def battle(pokemon_trainer, opponent_pokemon):
-    """
-    Runs a battle against an opponent pokemon.
-
-    Parameter:
-    - pokemon_trainer: PokemonTrainer object representing the character that leads the battle.
-    """
-
-    # options among which the pokemon trainer has to choose during an iteration of the battle
-    options = ["Attack", "Change Pokemon", "Use Item", "Run Away"]
-
-    # print some information
-    type_text(f"\nThe battle against {opponent_pokemon.name} begins!\n")
-
-    # the battle goes on until the opponent is catched or the opponent is defeated or the trainer runs away or all the trainer's pokemon are defeated.
-    round = 1
-    while True:
-
-        # print the round number and the health points of the two pokemon involved in the battle
-        type_text(f"\nRound {round}\n")
-        type_text(f"\n{pokemon_trainer.active_pokemon.name} HP: {pokemon_trainer.active_pokemon.curr_hp}\n")
-        type_text(f"{opponent_pokemon.name} HP: {opponent_pokemon.curr_hp}\n")
-
-        # make the pokemon trainer choose what to do in this iteration
-        type_text(f"\nIt's the turn of {pokemon_trainer.active_pokemon.name}.\n")
-        choice_id = choose_option(options)
-
-        # the pokemon trainer decides to attack
-        if choice_id == 0:
-            if attack(pokemon_trainer, opponent_pokemon):
-                return                                      # the battle ends, because the opponent pokemon is defeated
-
-        # the pokemon trainer wants to change the active pokemon
-        elif choice_id == 1:
-            if not change_pokemon(pokemon_trainer):
-                continue                                    # the change cannot be done, because the active pokemon is the only pokemon left, so the user must choose another option
-        
-        # the pokemon trainer wants to use an item
-        elif choice_id == 2:
-
-            # there are no items in the trainer's dictionary
-            if not pokemon_trainer.items:
-                type_text("\nYou do not have any item in your backpack. Choose another option.\n")
-                continue                                  # the user needs to select another action, because it is not possible to use items
-
-            # make the user choose an item and use it
-            if use_item(pokemon_trainer, opponent_pokemon):
-                return                                    # the battle ends, because the opponent pokemon has been catched
-        
-        # the pokemon trainer wants to run away
-        elif choice_id == 3:
-            if run_away(pokemon_trainer, opponent_pokemon):
-                return                                    # the battle ends, becasue the pokemon trainer has run away
 
         # make the opponent pokemon attack the trainer's active pokemon with a move sampled uniformly at random among the available ones
-        if opponent_pokemon_turn(pokemon_trainer, opponent_pokemon):
-            
-            # the pokemon trainer goes to the pokemon center since all trainer's pokemon are K.O.
-            pokemon_center_action(pokemon_trainer)
-            
-            return                                        # the battle ends, because the trainer's pokemon are K.O.
-
-        # check whether all trainer's pokemon as well as the wild pokemon have all moves with pps that are finished
-        if check_pps(pokemon_trainer, opponent_pokemon):
-            print("..")
-            return                                        # the battle ends, because all trainer's pokemon and the wild pokemon have no more pps
-
-        # update the round number
-        round += 1
-
-def explore_action(pokemon_trainer):
-    """
-    Makes the pokemon trainer explore the world, with a given probability of finding a wild pokemon opponent.
-
-    Parameter:
-    - pokemon_trainer: PokemonTrainer object representing the character that takes the action.
-    """
-
-    # probability of finding a wild pokemon
-    p = 0.8
-
-    # print some information
-    clear_terminal()
-    type_text("Exploring the Pokemon World")
-    type_text(" ...", delay=0.5)
-    type_text("\n\n")
-
-    # a wild pokemon has been encountered
-    if random.random() <= 0.8:
+        opponent_pokemon.use_move(random.choice([move_name for move_name, pp in opponent_pokemon.curr_pps.items() if pp > 0]), self.pokemon_trainer.active_pokemon, self.type_effectiveness)
         
-        # sample uniformly at random a wild pokemon among the loaded ones
-        sampled_pokemon = pokemon_from_dict(random.choice(wild_pokemon))
+        # check whether the trainer's active pokemon is defeated
+        if self.pokemon_trainer.active_pokemon.curr_hp <= 0:
+            
+            # print some information
+            type_text(f"\n{self.pokemon_trainer.active_pokemon.name.capitalize()} is defeated!\n")
+
+            # if all trainer's pokemon are defeated, then the battle ends and the pokemon trainer has to go to the pokemon center
+            if not self.change_pokemon():
+                type_text(f"\nAll {self.pokemon_trainer.name}'s pokemon are K.O., so {self.pokemon_trainer.name} loses the battle!\n")
+                return True
+        
+        # the battle is not ended
+        return False
+
+    def check_pps(self, opponent_pokemon):
+        """
+        Checks whether all trainer's pokemons and the opponent pokemon do not have any move with pp > 0.
+
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
+
+        Returns:
+        - no_pps: boolean indicating whether all trainer's pokemons and the opponent pokemon do not have any move with pp > 0.
+        """
+
+        # check whether the opponent pokemon has at least a move with pp > 0
+        for pp in opponent_pokemon.curr_pps.values():
+            if pp > 0:
+                return False
+        
+        # check whether there is at least one trainer's pokemon that can fight with at least one move with pp > 0
+        for pokemon in self.pokemon_trainer.pokemon_list:
+            if pokemon.curr_hp > 0:
+                for pp in opponent_pokemon.curr_pps.values():
+                    if pp > 0:
+                        return False
+                
+        # no pokemon has at least one move with pp > 0
+        type_text(f"\n{self.pokemon_trainer.name} has no pokemon with pp > 0 that can fight!\n")
+        type_text(f"Even {opponent_pokemon.name.capitalize()} has no move with pp > 0!\n")
+        type_text(f"The battle ends.\n")
+        return True
+
+    def battle(self, opponent_pokemon):
+        """
+        Runs a battle against an opponent pokemon.
+
+        Parameters:
+        - opponent_pokemon: PokemonCharacter object representing the opponent pokemon in the battle.
+
+        Returns:
+        - boolean indicating whether the battle has been won by the trainer (True) or not (False).
+          It returns False also in case the wild pokemon has been captured.
+        """
+
+        # options among which the pokemon trainer has to choose during an iteration of the battle
+        options = ["Attack", "Change Pokemon", "Use Item", "Run Away"]
 
         # print some information
-        type_text(f"A wild {sampled_pokemon.name} appears!\n")
+        type_text(f"\nThe battle against {opponent_pokemon.name.capitalize()} begins!\n")
 
-        # start a battle against the sampled wild pokemon
-        battle(pokemon_trainer, sampled_pokemon)
-    
-    # no wild pokemon has been encounterd
-    else:
-        type_text("There is no wild pokemon around.\n")
+        # the battle goes on until the opponent is catched or the opponent is defeated or the trainer runs away or all the trainer's pokemon are defeated.
+        round = 1
+        while True:
 
-def pokemon_center_action(pokemon_trainer):
-    """
-    Makes the pokemon trainer go to the pokemon center, restoring the HP of every pokemon in the trainer's list and the PP of all the moves of all pokemon.
+            # print the round number and the health points of the two pokemon involved in the battle
+            type_text(f"\nRound {round}\n")
+            type_text(f"\n{self.pokemon_trainer.active_pokemon.name.capitalize()}:\nHPs: {self.pokemon_trainer.active_pokemon.curr_hp}\nLevel: {self.pokemon_trainer.active_pokemon.level}\n")
+            type_text(f"\n{opponent_pokemon.name.capitalize()}:\nHPs: {opponent_pokemon.curr_hp}\nLevel: {opponent_pokemon.level}\n")
 
-    Parameter:
-    - pokemon_trainer: PokemonTrainer object representing the character that takes the action.
-    """
-    
-    # print some information
-    clear_terminal()
-    type_text("Welcome to the Pokemon Center!\n\nWe are restoring the HP and PP of all your pokemon")
-    type_text(" ...", delay=0.5)
-    type_text("\n")
+            # make the pokemon trainer choose what to do in this iteration
+            type_text(f"\nIt's the turn of {self.pokemon_trainer.active_pokemon.name.capitalize()}.\n")
+            choice_id = choose_option(options)
 
-    # restore the hp of every pokemon in the pokemon trainer's list
-    for pokemon in pokemon_trainer.pokemon_list:
-        pokemon.curr_hp = pokemon.base_stats["hp"]
-    
-    # restore the pp of every move of each pokemon
-    for pokemon in pokemon_trainer.pokemon_list:
-        for move in pokemon.moves:
-            move_name = move["name"]
-            pokemon.curr_pps[move_name] = move["pp"]
+            # the pokemon trainer decides to attack
+            if choice_id == 0:
+                if self.attack(opponent_pokemon):
+                    return True                                     # the battle ends, because the opponent pokemon is defeated
 
-    # print some information
-    type_text("\nAll your pokemon are restored.\n\nHope not to see you soon!\n")
+            # the pokemon trainer wants to change the active pokemon
+            elif choice_id == 1:
+                if not self.change_pokemon():
+                    continue                                        # the change cannot be done, because the active pokemon is the only pokemon left, so the user must choose another option
+            
+            # the pokemon trainer wants to use an item
+            elif choice_id == 2:
 
-def pokemon_store_action(pokemon_trainer):
-    """
-    Makes the pokemon trainer go to the pokemon store to fill all the trainer's items to their maximum: 10 potions and 10 pokeballs.
+                # there are no items in the trainer's dictionary
+                if not self.pokemon_trainer.items:
+                    type_text("\nYou do not have any item in your backpack. Choose another option.\n")
+                    continue                                        # the user needs to select another action, because it is not possible to use items
 
-    Parameter:
-    - pokemon_trainer: PokemonTrainer object representing the character that takes the action.
-    """
+                # make the user choose an item and use it
+                if self.use_item(opponent_pokemon):
+                    return False                                    # the battle ends, because the opponent pokemon has been catched
+            
+            # the pokemon trainer wants to run away
+            elif choice_id == 3:
+                if self.run_away(opponent_pokemon):
+                    return False                                    # the battle ends, becasue the pokemon trainer has run away
 
-    # items present in the store
-    store_items = ["potion", "pokeball"]
+            # make the opponent pokemon attack the trainer's active pokemon with a move sampled uniformly at random among the available ones
+            if self.opponent_pokemon_turn(opponent_pokemon):
+                
+                # the pokemon trainer goes to the pokemon center since all trainer's pokemon are K.O.
+                self.pokemon_center_action()
+                return False                                        # the battle ends, because the trainer's pokemon are K.O.
 
-    # print some information
-    clear_terminal()
-    type_text("Hello, happy to see you at the Pokemon Store.\n\nHere we go with the items you ordered")
-    type_text(" ...", delay=0.5)
-    type_text("\n\n")
+            # check whether all trainer's pokemon as well as the wild pokemon have all moves with pps that are finished
+            if self.check_pps(opponent_pokemon):
+                print("..")
+                return False                                        # the battle ends, because all trainer's pokemon and the wild pokemon have no more pps
 
-    # check the current quantities for the items present in the store that the trainer has
-    curr_items_quantities = {}
-    for item in store_items:
-        curr_items_quantities[item] = pokemon_trainer.items.get(item, 0)    # set the value to 0 if the item is not in pokemon_trainer.items
+            # update the round number
+            round += 1
 
-    # fill the pokemon trainer's items
-    for item in store_items:
-        quantity_to_sell = 10 - curr_items_quantities[item]
-        pokemon_trainer.add_items(item, quantity_to_sell)
+    def explore_action(self, p=0.8):
+        """
+        Makes the pokemon trainer explore the world, with a given probability of finding a wild pokemon opponent.
 
-    # print some information
-    type_text("\nThank you for purchasing! See you soon!\n")
+        Parameters:
+        - p: float representing the probability of finfing a wild pokemon.
+        """
 
-def run_game():
-    """
-    Runs the game.
-    """
+        # print some information
+        clear_terminal()
+        type_text("Exploring the Pokemon World")
+        type_text(" ...", delay=0.5)
+        type_text("\n\n")
 
-    # initialize the pokemon trainer
-    trainer = initialize_pokemon_trainer()
+        # a wild pokemon has been encountered
+        if random.random() <= 0.8:
+            
+            # sample uniformly at random a wild pokemon among the loaded ones
+            sampled_pokemon = self.to_pokemon_character(self.pokemons.sample().iloc[0])
 
-    # print a welcome message
-    type_text(f"\nWelcome to the Pokemon World, {trainer.name}!\n")
+            # assign a random level from 1 to 20 to the wild pokemon
+            sampled_pokemon.set_level(random.randint(1, 20))
 
-    # actions among which the player can choose
-    actions = ["Explore", "Go to the Pokemon Center", "Go to the Pokemon Store", "Quit"]
+            # print some information
+            type_text(f"A wild {sampled_pokemon.name.capitalize()} appears!\n")
 
-    # make the player play until the player decides to quit
-    while True:
+            # start a battle against the sampled wild pokemon
+            level_up = self.battle(sampled_pokemon)
 
-        # make the player choose the next action
-        chosen_id = choose_option(actions)
+            # increment the level of the active pokemon by 1 in case the wild pokemon was defeated and the active pokemon does not have the maximum level allowed
+            if level_up:
+                if self.pokemon_trainer.active_pokemon.level < self.max_level_game:
+                    self.pokemon_trainer.active_pokemon.set_level(self.pokemon_trainer.active_pokemon.level + 1)
+                    type_text(f"{self.pokemon_trainer.name}'s {self.pokemon_trainer.active_pokemon.name.capitalize()} increases its level!\n")
+                    type_text(f"The new level of {self.pokemon_trainer.active_pokemon.name.capitalize()} is {self.pokemon_trainer.active_pokemon.level}.\n")
+                else:
+                    type_text(f"{self.pokemon_trainer.active_pokemon.name.capitalize()} already has the maximum level allowed in the game ({self.max_level_game}).\n")
+        
+        # no wild pokemon has been encounterd
+        else:
+            type_text("There is no wild pokemon around.\n")
 
-        # run the action selected by the user
-        if chosen_id == 0:
-            explore_action(trainer)
-        elif chosen_id == 1:
-            pokemon_center_action(trainer)
-        elif chosen_id == 2:
-            pokemon_store_action(trainer)
-        elif chosen_id == 3:
-            type_text("\nThe game has been successfully closed. Thank you for playing!\n")
-            break
+    def pokemon_center_action(self):
+        """
+        Makes the pokemon trainer go to the pokemon center, restoring the HPs of every pokemon in the trainer's list and the PPs of all the moves of all pokemon.
+        """
+        
+        # print some information
+        clear_terminal()
+        type_text("Welcome to the Pokemon Center!\n\nWe are restoring the HPs and PPs of all your pokemons")
+        type_text(" ...", delay=0.5)
+        type_text("\n")
+
+        # restore the hp of every pokemon in the pokemon trainer's list
+        for pokemon in self.pokemon_trainer.pokemon_list:
+            pokemon.curr_hp = pokemon.active_stats["hp"]
+        
+        # restore the pp of every move of each pokemon
+        for pokemon in self.pokemon_trainer.pokemon_list:
+            for move in pokemon.moves:
+                move_name = move["name"]
+                pokemon.curr_pps[move_name] = move["pp"]
+
+        # print some information
+        type_text("\nAll your pokemon are restored.\nHope not to see you soon!\n")
+
+    def pokemon_store_action(self):
+        """
+        Makes the pokemon trainer go to the pokemon store to fill all the trainer's items to their maximum: 10 potions and 10 pokeballs.
+        """
+
+        # items present in the store
+        store_items = ["potion", "pokeball"]
+
+        # print some information
+        clear_terminal()
+        type_text("Hello, happy to see you at the Pokemon Store.\n\nHere we go with the items you ordered")
+        type_text(" ...", delay=0.5)
+        type_text("\n\n")
+
+        # check the current quantities for the items present in the store that the trainer has
+        curr_items_quantities = {}
+        for item in store_items:
+            curr_items_quantities[item] = self.pokemon_trainer.items.get(item, 0)    # set the value to 0 if the item is not in pokemon_trainer.items
+
+        # fill the pokemon trainer's items
+        for item in store_items:
+            quantity_to_sell = 10 - curr_items_quantities[item]
+            self.pokemon_trainer.add_items(item, quantity_to_sell)
+
+        # print some information
+        type_text("\nThank you for purchasing! See you soon!\n")
+
+    def exit_action(self):
+        """
+        Exits the game and saves current data if requested by the user.
+        """
+
+        # save data if the user wants
+        choice = choose_option(["Yes", "No"], "Do you want to save data?")
+        if choice == 0:
+            os.makedirs(self.savings_folder, exist_ok=True)
+            saving_name = ""
+            while True:
+                clear_terminal()
+                type_text(f"How do you want to name the saving?\n")
+                saving_name = input("> ")
+                if saving_name + ".pickle" in os.listdir(self.savings_folder):
+                    overwrite = choose_option(["Yes", "No"], f"A previous saving with name \"{saving_name}\" exists. Do you want to overwrite it?")
+                    if overwrite == 1:
+                        continue
+                type_text("Saving data...\n")
+                with open(os.path.join(self.savings_folder, saving_name + ".pickle"), "wb") as file:
+                    pickle.dump(self.pokemon_trainer, file)
+                type_text("Your data has been successfully saved!\n\nSee you soon!\n\n")
+                break
+        
+        # do not save and just exit the game
+        else:
+            type_text("All right!\n\nSee you soon!\n\n")
+
+    def run(self):
+        """
+        Runs the game.
+        """
+
+        # actions among which the player can choose
+        actions = ["Explore", "Go to the Pokemon Center", "Go to the Pokemon Store", "Quit"]
+
+        # make the player play until the player decides to quit
+        while True:
+
+            # make the player choose the next action
+            chosen_id = choose_option(actions)
+
+            # run the action selected by the user
+            if chosen_id == 0:
+                self.explore_action()
+            elif chosen_id == 1:
+                self.pokemon_center_action()
+            elif chosen_id == 2:
+                self.pokemon_store_action()
+            elif chosen_id == 3:
+                self.exit_action()
+                break
