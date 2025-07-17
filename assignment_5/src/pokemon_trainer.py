@@ -127,11 +127,11 @@ class PokemonTrainer:
                 for i in range(1, 4):
                     type_text(f"{i}... ")
                     time.sleep(0.5)
-                type_text(f"Yes! Congratulations! {self.name} catched the wild {opponent_pokemon.name}!\nThe catched {opponent_pokemon.name} has been added to yuour list of pokemon.\n")
+                type_text(f"Yes! Congratulations! {self.name} catched the wild {opponent_pokemon.name.capitalize()}!\nThe catched {opponent_pokemon.name.capitalize()} has been added to yuour list of pokemon.\n")
                 
                 # there is no more space for a new pokemon
                 if len(self.pokemon_list) >= self.max_n_pokemon:
-                    type_text(f"Oh, no! You do not have enough space for your new {opponent_pokemon.name}!\n")
+                    type_text(f"Oh, no! You do not have enough space for your new {opponent_pokemon.name.capitalize()}!\n")
                     raise OverflowError("Your list of pokemon is full.")
                 
                 # add the pokemon to the trainer's list
@@ -171,21 +171,3 @@ class PokemonTrainer:
         if len(self.pokemon_list) == 1:
             self.active_pokemon = self.pokemon_list[0]
     
-    def change_active_pokemon(self, new_active_pokemon_name):
-        """
-        Changes the active pokemon by setting as new active pokemon the one in the trainer's list with name new_active_pokemon_name.
-
-        Parameters:
-        - new_active_pokemon_name: name of the pokemon in the trainer's list to set as active pokemon.
-        """
-
-        # find the pokemon in the trainer's list with the input name and set it as the active pokemon
-        for pokemon in self.pokemon_list:
-            if pokemon.name == new_active_pokemon_name:
-                previous_name = self.active_pokemon.name
-                self.active_pokemon = pokemon
-                type_text(f"{self.name} calls {self.active_pokemon.name} to substitute {previous_name}.\n")
-                return
-        
-        # there is no pokemon in the trainer's list with the input name, so raise a ValueError
-        raise ValueError(f"{new_active_pokemon_name} is not in your list of Pokemon")

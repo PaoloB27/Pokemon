@@ -332,22 +332,30 @@ class GameEngine():
         type_text(f"{opponent_pokemon.name.capitalize()} prevents {self.pokemon_trainer.name.capitalize()} to run away, the battle continues!\n")
         return False
 
-    def change_pokemon(self):
+    def change_pokemon(self, exclude_active=True):
         """
         Changes the active pokemon during a battle.
+
+        Parameters:
+        - exclude_active: boolean indicating whether the active pokemon has to included among the eligible pokemons (True) or not (False).
 
         Returns:
         - True if the change has been successful, False if the change cannot be made.
         """
 
         # pokemon that can be selected for the change
-        available_pokemon = [pokemon.name for pokemon in self.pokemon_trainer.pokemon_list if pokemon is not self.pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
-        available_pokemon_to_display = [f"{pokemon.name} | {pokemon.curr_hp} HP" for pokemon in self.pokemon_trainer.pokemon_list if pokemon is not self.pokemon_trainer.active_pokemon and pokemon.curr_hp > 0]
+        available_pokemons = [pokemon for pokemon in self.pokemon_trainer.pokemon_list if pokemon.curr_hp > 0]
+        available_pokemons_to_display = [f"{pokemon.name.capitalize()} | {pokemon.curr_hp} HP" for pokemon in self.pokemon_trainer.pokemon_list if pokemon.curr_hp > 0]
         
+        # exclude the active pokemon, if required, being careful not to remove pokemons with the same name of the active one
+        if exclude_active:
+            available_pokemons = [pokemon for pokemon in self.pokemon_trainer.pokemon_list if pokemon.curr_hp > 0 and pokemon is not self.pokemon_trainer.active_pokemon]
+            available_pokemons_to_display = [f"{pokemon.name.capitalize()} | {pokemon.curr_hp} HP" for pokemon in self.pokemon_trainer.pokemon_list if pokemon.curr_hp > 0 and pokemon is not self.pokemon_trainer.active_pokemon]
+
         # there is at least a pokemon that can be used
-        if available_pokemon:
-            chosen_pokemon = available_pokemon[choose_option(available_pokemon_to_display, "What pokemon do you want to become active?")]
-            self.pokemon_trainer.change_active_pokemon(chosen_pokemon)
+        if available_pokemons:
+            chosen_pokemon = available_pokemons[choose_option(available_pokemons_to_display, "What pokemon do you want to choose?")]
+            self.pokemon_trainer.active_pokemon = chosen_pokemon
             return True
         
         # there is no pokemon that can be used
@@ -368,7 +376,7 @@ class GameEngine():
         """
 
         # print some information    
-        type_text(f"\nIt's the turn of {opponent_pokemon.name.capitalize()} now!\n\n")
+        type_text(f"\nIt's the turn of {opponent_pokemon.name.capitalize()}.\n\n")
 
         # if the wild pokemon does not have any move with pp > 0, then return
         if not [pp for pp in opponent_pokemon.curr_pps.values() if pp > 0]:
@@ -423,10 +431,18 @@ class GameEngine():
 
     def get_features(self, player_pokemon, opponent_pokemon):
         """
+        Creates the features with the information of the two input pokemons to be fed to the recommender.
+
+        Parameters:
+        - player_pokemon: PokemonCharacter object with the trainer's pokemon involved in the battle.
+        - opponent_pokemon: PokemonCharacter object with the opponent pokemon involved in the battle.
+
+        Returns:
+        - X: pandas dataframe with the features to be fed to the recommender.
         """
 
         # create a datafram with the information about the two pokemons
-        X_pokemon = pd.DataFrame(
+        X = pd.DataFrame(
             [{
                 "player_hp": player_pokemon.curr_hp,
                 "player_attack": player_pokemon.active_stats["attack"],
@@ -446,37 +462,42 @@ class GameEngine():
 
         # add a column to the dataframe for each pokemon and for each type, with value 0 if the type is not in the pokemon's types and 1 otherwise
         for pokemon_type in types:
-            X_pokemon[f"player_{pokemon_type}"] = 1 if pokemon_type in player_pokemon.types else 0
-            X_pokemon[f"opponent_{pokemon_type}"] = 1 if pokemon_type in opponent_pokemon.types else 0
+            X[f"player_{pokemon_type}"] = 1 if pokemon_type in player_pokemon.types else 0
+            X[f"opponent_{pokemon_type}"] = 1 if pokemon_type in opponent_pokemon.types else 0
 
         # sort the dataframe such that it has the columns in the same order used to train the model
-        
+        X = X.sort_index(axis=1)
 
-        return X_pokemon
+        return X
 
     def recommendation_system(self, opponent_pokemon):
         """
-        Uses the recommender to predict the probability of winning against the opponent pokemon of each pokemon (with hps > 0) in the trainer's list and suggests to the pokemon trainer which pokemon to choose.
+        Uses the recommender to predict the probability of winning against the opponent pokemon of each pokemon (with hps > 0) in the trainer's list.
+        It suggests to the pokemon trainer the pokemon with the largest winning probability.
         If no trainer's pokemon has a winning probability > 0.5, then the system suggests to the pokemon trainer to run away.
         For sure the trainer's list of pokemon contains at least one pokemon with hps > 0, since thsi function is called at the beginning of a battle.
         By game construction, indeed, when all the pokemons of the trainer are defeated, the pokemon trainer is sent to the pokemon center.
 
         Parameters:
         - opponent_pokemon: PokemonCharacter object representing the opponent pokemon to be faced in the battle by the pokemon trainer.
-
-        Returns:
-        - suggested_pokemon:
         """
 
         # iterate through the pokemons in the trainer's list to find the one with largest winning probability
-        suggestion = {"name": "", "prob": 0}
+        suggestion = {"name": "", "winning_prob": 0}
         for pokemon in self.pokemon_trainer.pokemon_list:
             if pokemon.curr_hp > 0:
-                X_pokemon = self.get_features(pokemon, opponent_pokemon)
-                predicted_prob = self.recommender.predict_proba(X_pokemon)
-                print(predicted_prob)
-                
-                
+                X = self.get_features(pokemon, opponent_pokemon)
+                predicted_winning_prob = self.recommender.predict_proba(X)[0, 1]
+                if predicted_winning_prob > suggestion["winning_prob"]:
+                    suggestion = {"name": pokemon.name, "winning_prob": predicted_winning_prob}
+        
+        # if the largest predicted winning probability is > 0.5, then suggest the corresponding pokemon
+        if suggestion["winning_prob"] > 0.5:
+            type_text(f"\nAI suggestion: choose {suggestion['name'].capitalize()}. It has a probability of {suggestion['winning_prob']:.2f} of winning against {opponent_pokemon.name.capitalize()}\n")
+        
+        # else, suggest to run
+        else:
+            type_text(f"\nAI suggestion: run Away! {opponent_pokemon.name.capitalize()} is too strong for your pokemons!\n")
 
     def battle(self, opponent_pokemon):
         """
@@ -490,8 +511,14 @@ class GameEngine():
           It returns False also in case the wild pokemon has been captured.
         """
 
-        # recommend the best pokemon to choose for the battle to the user
+        # print some information about the encountered wild pokemon
+        type_text(f"\n{opponent_pokemon.name.capitalize()}:\nHPs: {opponent_pokemon.curr_hp}\nLevel: {opponent_pokemon.level}\n")
+
+        # recommend the best pokemon to choose for the battle to the user or suggest to run if the opponent pokemon is to strong
         self.recommendation_system(opponent_pokemon)
+
+        # make the trainer choose the active pokemon that will start the battle
+        self.change_pokemon(exclude_active=False)
 
         # options among which the pokemon trainer has to choose during an iteration of the battle
         options = ["Attack", "Change Pokemon", "Use Item", "Run Away"]
@@ -618,7 +645,7 @@ class GameEngine():
                 pokemon.curr_pps[move_name] = move["pp"]
 
         # print some information
-        type_text("\nAll your pokemon are restored.\nHope not to see you soon!\n")
+        type_text("\nAll your pokemons are restored.\nHope not to see you soon!\n")
 
     def pokemon_store_action(self):
         """
