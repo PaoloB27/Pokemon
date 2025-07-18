@@ -75,7 +75,7 @@ class PokemonCharacter:
                 break
 
         # print some information about the move
-        type_text(f"{self.name} uses {move_name}!\n")
+        type_text(f"{self.name.capitalize()} uses {move_name.capitalize()}!\n")
 
         # reduce the power points (pp) of the move, independently of whether the move succeeds or not
         self.curr_pps[move_name] -= 1
@@ -97,8 +97,8 @@ class PokemonCharacter:
             opponent_pokemon.curr_hp -= damage
 
             # print some information about the move
-            type_text(f"It dealt a damage of {damage} HP to {opponent_pokemon.name}.\n")
+            type_text(f"It deals a damage of {damage} HP to {opponent_pokemon.name.capitalize()}.\n")
         
         # if the move fails, just print information
         else:
-            type_text(f"{self.name}'s {move_name} missed!\n")
+            type_text(f"{self.name.capitalize()}'s {move_name} misses!\n")

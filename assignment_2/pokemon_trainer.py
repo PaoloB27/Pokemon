@@ -87,12 +87,12 @@ class PokemonTrainer:
 
         # give a potion to the active pokemon, if there is a potion among the trainer's items
         if "potion" in self.items:
-            type_text(f"\n{self.name} gives a potion to {self.active_pokemon.name}!\n")
-            type_text(f"Previous HP of {self.active_pokemon.name}: {self.active_pokemon.curr_hp}\n")
+            type_text(f"\n{self.name} gives a potion to {self.active_pokemon.name.capitalize()}!\n")
+            type_text(f"Previous HP of {self.active_pokemon.name.capitalize()}: {self.active_pokemon.curr_hp}\n")
             self.active_pokemon.curr_hp += 20
             if self.active_pokemon.curr_hp > self.active_pokemon.base_stats["hp"]:
                 self.active_pokemon.curr_hp = self.active_pokemon.base_stats["hp"]
-            type_text(f"Current HP of {self.active_pokemon.name}: {self.active_pokemon.curr_hp}\n")
+            type_text(f"Current HP of {self.active_pokemon.name.capitalize()}: {self.active_pokemon.curr_hp}\n")
             self.decrease_item("potion")
 
         # there are not potions in the dictionary of items
@@ -127,11 +127,11 @@ class PokemonTrainer:
                 for i in range(1, 4):
                     type_text(f"{i}... ")
                     time.sleep(0.5)
-                type_text(f"Yes! Congratulations! {self.name} catched a {opponent_pokemon.name}!\nThe catched {opponent_pokemon.name} has been added to yuour list of pokemon.\n")
-                
+                type_text(f"Yes! Congratulations! {self.name} catched a {opponent_pokemon.name.capitalize()}!\nThe catched {opponent_pokemon.name.capitalize()} has been added to your list of pokemon.\n")
+
                 # there is no more space for a new pokemon
                 if len(self.pokemon_list) >= self.max_n_pokemon:
-                    type_text(f"Oh, no! You do not have enough space for your new {opponent_pokemon.name}!\n")
+                    type_text(f"Oh, no! You do not have enough space for your new {opponent_pokemon.name.capitalize()}!\n")
                     raise OverflowError("Your list of pokemon is full.")
                 
                 # add the pokemon to the trainer's list
@@ -144,7 +144,7 @@ class PokemonTrainer:
                 for i in range(1, 3):
                     type_text(f"{i}... ")
                     time.sleep(0.5)
-                type_text(f"The wild {opponent_pokemon.name} broke free!\n")
+                type_text(f"The wild {opponent_pokemon.name.capitalize()} breaks free!\n")
                 return False
 
         # there are not pokeballs in the dictionary of items

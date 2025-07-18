@@ -179,7 +179,7 @@ class GameEngine:
 
         # the pokemon trainer successfully runs away, so the battle is over
         if random.random() < run_prob:
-            type_text(f"{self.pokemon_trainer.name.capitalize()} ran away, the battle is over.\n")
+            type_text(f"{self.pokemon_trainer.name.capitalize()} runs away, the battle is over.\n")
             return True
         
         # the pokemon trainer fails to run away, so the battle goes on
@@ -381,7 +381,7 @@ class GameEngine:
         
         # print some information
         clear_terminal()
-        type_text("Welcome to the Pokemon Center!\n\nWe are restoring the HP and PP of all your pokemon")
+        type_text("Welcome to the Pokemon Center!\n\nWe are restoring the HP and PP of all your pokemons")
         type_text(" ...", delay=0.5)
         type_text("\n")
 
@@ -396,7 +396,7 @@ class GameEngine:
                 pokemon.curr_pps[move_name] = move["pp"]
 
         # print some information
-        type_text("\nAll your pokemon are restored.\n\nHope not to see you soon!\n")
+        type_text("\nAll your pokemons are restored.\n\nHope not to see you soon!\n")
 
     def pokemon_store_action(self):
         """
@@ -431,7 +431,7 @@ class GameEngine:
         """
 
         # print a welcome message
-        type_text(f"\nWelcome to the Pokemon World, {self.trainer.name}!\n")
+        type_text(f"\nWelcome to the Pokemon World, {self.pokemon_trainer.name}!\n")
 
         # actions among which the player can choose
         actions = ["Explore", "Go to the Pokemon Center", "Go to the Pokemon Store", "Quit"]
