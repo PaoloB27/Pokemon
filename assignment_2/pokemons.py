@@ -1,4 +1,4 @@
-starter_pokemon = [
+starter_pokemons = [
     {
         "national_pokedex_number": 1,
         "name": "Bulbasaur",
@@ -24,7 +24,7 @@ starter_pokemon = [
     }
 ]
 
-wild_pokemon = [
+wild_pokemons = [
     {
         "national_pokedex_number": 10,
         "name": "Caterpie",
