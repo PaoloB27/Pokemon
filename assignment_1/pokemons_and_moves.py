@@ -39,7 +39,7 @@ moves = [
 ]
 
 # starter pokemon
-starter_pokemon = [
+starter_pokemons = [
     {
         "national_pokedex_number": 1,
         "name": "Bulbasaur",
