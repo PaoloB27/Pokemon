@@ -1,7 +1,7 @@
 import os
 import random
 import argparse
-from simulations import Simulation
+from simulation import Simulation
 
 def parse_args():
     """
