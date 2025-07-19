@@ -221,6 +221,9 @@ class Simulation:
         After that self.n_battles with the input starter pokemon have been completed, the game ends.
         """
 
+        # initialize the list that will contain the data collected during the simulation
+        self.collected_data = []
+
         # extract the starter pokemons
         starter_pokemons = [pokemon for pokemon in self.pokemons.values() if pokemon.name in self.starter_names]
 
