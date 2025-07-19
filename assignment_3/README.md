@@ -1,6 +1,6 @@
 # Setup
 
-Python version `3.13.5` is used for this project.
+Python version `3.12.3` is used for this project.
 The python packages necessary for this project along with theri versions are provided in the file `requirements.txt`.
 To install them, run the following command:
 ```

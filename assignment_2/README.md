@@ -1,6 +1,6 @@
 # Setup
 
-Python version `3.13.5` is used for this project.
+Python version `3.12.3` is used for this project.
 Only standard packages are used, so there is no need to install additional packages.
 
 # Introduction
