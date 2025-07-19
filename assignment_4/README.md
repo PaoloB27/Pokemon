@@ -10,9 +10,15 @@ pip install -r requirements.txt
 # Introduction
 
 This project contains the implementation of a simulation that automatically runs an input number of games and an input number of battles, collecting data.
-More precisely, for each starter pokemon, `n_battles` battles are run for `n_games` games, leading to `n_starters * n_battles * n_games` total battles, where `n_starters` is the number of starter pokemons.
+More precisely, `n_battles` battles are run for `n_games` games, leading to `n_battles * n_games` total battles.
+At the beginning of each battle a starter pokemon is chosen uniformly at random among the input options and a wild pokemon is sampled uniformly at random among all possible pokemons in the game.
 
-The collected data is then analyzed by another implement script, which provides as output some results and saves interesting plots.
+The collected data is then analyzed by another implemented script, which provides as output some results and saves interesting plots.
+
+The main differences with respect to the simulation implemented in `../assignment_3/` lie in:
+- the usage of Pandas DataFrames rather than Pickle objects to store data;
+- the kind of data collected during a simulation run;
+- the type of analysis performed, which results in different plots.
 
 # Files
 
@@ -28,7 +34,7 @@ Three directories are provided:
     - `pokemons.json`: file with all the possible pokemons that can be used in the game;
     - `type_effectiveness.json`: file with all the pairs of types with a value that indicates the effectiveness of a move of a certain type against a  pokemon of another type;
 - `results`: directory that contains some results obteined by the analysis of data provided by a simulation run with standard input parameters.
-Inside, the file `collected_data.pickle` has the data colledted by a simulation run with standard parameters.
+Inside, the file `collected_data.csv` has the data colledted by a simulation run with standard parameters.
 In addition, the file `requirements.txt` is present and reports all the packages used in the project with their versions.
 
 # Execution
