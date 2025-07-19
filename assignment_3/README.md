@@ -12,7 +12,7 @@ pip install -r requirements.txt
 This project contains the implementation of a simulation that automatically runs an input number of games and an input number of battles, collecting data.
 More precisely, for each starter pokemon, `n_battles` battles are run for `n_games` games, leading to `n_starters * n_battles * n_games` total battles, where `n_starters` is the number of starter pokemons.
 
-The collected data is then analyzed by another implement script, which provides as output some results and saves interesting plots.
+The collected data is then analyzed by another implemented script, which provides as output some results and saves interesting plots.
 
 # Files
 
