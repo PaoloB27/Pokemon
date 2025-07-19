@@ -2,7 +2,6 @@ import os
 import json
 from copy import deepcopy
 import random
-import argparse
 import pandas as pd
 from tqdm import tqdm
 from pokemon_character import PokemonCharacter

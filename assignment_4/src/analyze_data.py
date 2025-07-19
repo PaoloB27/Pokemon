@@ -3,7 +3,7 @@ import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from simulations import load_moves, load_pokemons
+from simulation import Simulation
 
 def compute_hp_reductions(data):
     """
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     # load data
     simulation_data = pd.read_csv(args.input_data)
-    pokemons = load_pokemons(args.pokemons, load_moves(args.moves))
+    pokemons = Simulation.load_pokemons(args.pokemons, Simulation.load_moves(args.moves))
 
     # create the output folder, if it does not exist
     os.makedirs(args.output_dir, exist_ok=True)
