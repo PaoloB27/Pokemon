@@ -1,3 +1,6 @@
+# large model file
+./assignment_5/model/model.pickle
+
 # MacOS
 .DS_Store
 
