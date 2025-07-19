@@ -575,7 +575,6 @@ class GameEngine():
 
             # check whether all trainer's pokemon as well as the wild pokemon have all moves with pps that are finished
             if self.check_pps(opponent_pokemon):
-                print("..")
                 return False                                        # the battle ends, because all trainer's pokemon and the wild pokemon have no more pps
 
             # update the round number
