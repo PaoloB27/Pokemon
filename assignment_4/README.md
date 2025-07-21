@@ -1,3 +1,6 @@
+# Author
+Paolo Bresolin, AIDA Lab, Department of Information Engineering, University of Padova.
+
 # Setup
 
 Python version `3.12.3` is used for this project.
