@@ -29,6 +29,7 @@ Three directories are provided:
     - `type_effectiveness.json`: file with all the pairs of types with a value that indicates the effectiveness of a move of a certain type against a  pokemon of another type;
 - `results`: directory that contains some results obteined by the analysis of data provided by a simulation run with standard input parameters.
 Inside, the file `collected_data.pickle` has the data colledted by a simulation run with standard parameters.
+
 In addition, the file `requirements.txt` is present and reports all the packages used in the project with their versions.
 
 # Execution
