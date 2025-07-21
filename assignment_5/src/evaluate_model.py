@@ -99,9 +99,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Validates a trained model on a test set.")
 
     # arguments
-    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("..", "data", "collected_data.csv"), help="Path to the input dataset with data collected from a simulation.")
+    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("..", "results", "collected_data.csv"), help="Path to the input dataset with data collected from a simulation.")
     parser.add_argument("-m", "--model_path", type=str, required=False, default=os.path.join("..", "model", "model.pickle"), help="Path to the file where the trained model is saved.")
-    parser.add_argument("-t", "--test_indices_path", type=str, required=False, default=os.path.join("..", "data", "test_indices.npy"), help="Path to the file with the indices of the test samples in the original dataset.")
+    parser.add_argument("-t", "--test_indices_path", type=str, required=False, default=os.path.join("..", "results", "test_indices.npy"), help="Path to the file with the indices of the test samples in the original dataset.")
     parser.add_argument("-p", "--plots_dir", type=str, required=False, default=os.path.join("..", "results"), help="Path to the directory where to save the generated plots.")
     parser.add_argument("-r", "--random_seed", type=int, required=False, default=27, help="Random seed for reproducibility.")
                           

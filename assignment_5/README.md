@@ -1,6 +1,6 @@
 # Setup
 
-Python version `3.13.5` is used for this project.
+Python version `3.12.3` is used for this project.
 The python packages necessary for this project along with theri versions are provided in the file `requirements.txt`.
 To install them, run the following command:
 ```
@@ -9,7 +9,15 @@ pip install -r requirements.txt
 
 # Introduction
 
-This project contains the implementation of a simulation that automatically runs an input number of games and an input number of battles, collecting data.
+This project contains the implementation of:
+- a simulation that automatically runs an input number of games and an input number of random battles among pokemons chosen uniformly at random from the dataset, collecting data;
+- the definition, training and validation of a Machine Learning model trained on simulation data to predict the outcome of a battle, given as input the active statistics and the types of the pokemons involved;
+- the implementation of a more complete pokemon game. In particular, the most important new features with respect to the previous assignments are:
+    - all pokemons are assigned an initial level and upgrade based on the outcomes of the battles they take part in;
+    - the user can save the current game and load an existing one as well as start a new game;
+    - the game is START FROM HERE WITH RECOMMENDATION SYSTEM
+
+
 More precisely, `n_battles` battles are run for `n_games` games, leading to `n_battles * n_games` total battles.
 At the beginning of each battle a starter pokemon is chosen uniformly at random among the input options and a wild pokemon is sampled uniformly at random among all possible pokemons in the game.
 

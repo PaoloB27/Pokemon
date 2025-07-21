@@ -75,8 +75,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Splits data into training ad test sets and trains a model on data collected from a simulation.")
 
     # arguments
-    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("..", "data", "collected_data.csv"), help="Path to the input dataset with data collected from a simulation.")
-    parser.add_argument("-t", "--test_indices_path", type=str, required=False, default=os.path.join("..", "data", "test_indices.npy"), help="Path to the ifile where to save test indices.")
+    parser.add_argument("-i", "--input_data", type=str, required=False, default=os.path.join("..", "results", "collected_data.csv"), help="Path to the input dataset with data collected from a simulation.")
+    parser.add_argument("-t", "--test_indices_path", type=str, required=False, default=os.path.join("..", "results", "test_indices.npy"), help="Path to the ifile where to save test indices.")
     parser.add_argument("-m", "--model_path", type=str, required=False, default=os.path.join("..", "model", "model.pickle"), help="Path to the file where to save the trained model.")
     parser.add_argument("-r", "--random_seed", type=int, required=False, default=27, help="Random seed for reproducibility.")
                           
