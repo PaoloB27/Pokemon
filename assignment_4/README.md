@@ -33,8 +33,9 @@ Three directories are provided:
     - `moves.json`: file with all the moves that can be used by pokemons in the simulation;
     - `pokemons.json`: file with all the possible pokemons that can be used in the game;
     - `type_effectiveness.json`: file with all the pairs of types with a value that indicates the effectiveness of a move of a certain type against a  pokemon of another type;
-- `results`: directory that contains some results obteined by the analysis of data provided by a simulation run with standard input parameters.
-Inside, the file `collected_data.csv` has the data colledted by a simulation run with standard parameters.
+- `results`: directory that contains some results obtained by the analysis of data provided by a simulation run with standard input parameters.
+Inside, the file `collected_data.csv` has the data collected by a simulation run with standard parameters.
+
 In addition, the file `requirements.txt` is present and reports all the packages used in the project with their versions.
 
 # Execution
